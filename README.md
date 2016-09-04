@@ -1,7 +1,7 @@
 PSAlphaFS
 =======
 
-PSAlphaFS is a wrapper for the ALphaFS .NET library providing useful powerShell functions that attempt to replicate the functionality of the following cmdlets shipped by microsoft.
+PSAlphaFS is a wrapper for the ALphaFS .NET library providing useful powerShell functions that attempt to mimic the functionality of the following cmdlets shipped by microsoft.
 
 * Get-ChildItem
 * Get-Item
