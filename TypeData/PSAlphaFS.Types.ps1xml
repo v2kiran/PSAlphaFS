@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<Types> 
+  <Type>
+    <Name>Alphaleonis.Win32.Filesystem.FileInfo</Name>
+		<Members>
+		  <ScriptProperty>
+			<Name>Mode</Name>
+			<GetScriptBlock>
+			  if ( ($this.Attributes  -split ',').trim().contains('Directory') ){'Directory'}Else{'File'}
+			</GetScriptBlock>
+		  </ScriptProperty>
+		  <ScriptProperty>
+			<Name>PathLength</Name>
+			<GetScriptBlock>
+			  if ( ($this.Attributes  -split ',').trim().contains('Directory') ){''}Else{$this.FullName.Length}
+			</GetScriptBlock>
+		  </ScriptProperty>		  
+		  <ScriptProperty>
+			<Name>BaseName</Name>
+			<GetScriptBlock>
+			  if ($this.Extension.Length -gt 0){$this.Name.Remove($this.Name.Length - $this.Extension.Length)}else{$this.Name}
+			</GetScriptBlock>
+		  </ScriptProperty>
+		  <MemberSet>
+			<Name>PSStandardMembers</Name>
+			<Members>
+			  <PropertySet>
+				<Name>DefaultDisplayPropertySet</Name>
+				<ReferencedProperties>
+				  <Name>Mode</Name>					
+				  <Name>LastWriteTime</Name>
+				  <Name>Length</Name>
+				  <Name>Name</Name>
+				</ReferencedProperties>
+			  </PropertySet>
+			</Members>
+		  </MemberSet>
+		</Members>
+  </Type>
+</Types>

@@ -1,0 +1,33 @@
+Maximum Path Length Limitation
+In the Windows API, the maximum length for a path is MAX_PATH, which is defined as 260 characters. A local path is structured in the following order: drive letter, colon, backslash, name components separated by backslashes, and a terminating null character. For example, the maximum path on drive D is "D:\some 256-character path string<NUL>" where "<NUL>" represents the invisible terminating null character for the current system codepage. (The characters < > are used here for visual clarity and cannot be part of a valid path string.)
+
+The AlphaFS library overcomes the MAX_PATH limitation of 260 characters and is provided as Open Source, licensed under the MIT license. AlphaFS provides a namespace (Alphaleonis.Win32.Filesystem) containing a number of classes. Most notable are replications of the System.IO.File, System.IO.Directory and System.IO.Path, all with support for the extended-length paths (up to 32.000 chars)
+
+PSAlphaFS is a wrapper for the ALphaFS .NET library providing useful powerShell functions that replicate the functionality of the following cmdlets shipped by microsoft.
+
+Get-ChildItem
+Get-Item
+Copy-Item
+Rename-Item
+Remove-Item
+New-Item
+Move-Item
+
+The cmdlets in this module have been prefixed with the word "long" to distinguish them from the ones provided by microsoft.
+
+Get-LongChildItem (alias ldir)
+Get-LongItem
+Copy-LongItem
+Rename-LongItem
+Move-LongItem
+Remove-LongItem
+New-LongItem
+
+
+Links:
+
+MAX_PATH
+https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx#maxpath
+
+AlphaFS
+https://github.com/alphaleonis/AlphaFS
