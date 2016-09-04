@@ -15,7 +15,7 @@ PSAlphaFS is a wrapper for the ALphaFS .NET library providing useful powerShell 
 ## Installation
 
 You have 2 choices:
-* Download From PowerShell Gallery(requires PowerShell V5).
+* Download From [PowerShell Gallery](https://www.powershellgallery.com/packages/PSAlphaFS/1.0.0.0) (requires PowerShell V5).
 
 ```powershell
 Install-Module PSAlphaFS -scope CurrentUser
@@ -43,7 +43,7 @@ In the Windows API, the maximum length for a path is MAX_PATH, which is defined 
 
 The AlphaFS library overcomes the MAX_PATH limitation of 260 characters and is provided as Open Source, licensed under the MIT license. AlphaFS provides a namespace (Alphaleonis.Win32.Filesystem) containing a number of classes. Most notable are replications of the System.IO.File, System.IO.Directory and System.IO.Path, all with support for the extended-length paths (up to 32.000 chars)
 
-PSAlphaFS is a wrapper for the ALphaFS .NET library.
+PSAlphaFS is a wrapper for the ALphaFS .NET library, providing a small subset of functions that overcome the long path limitations of the windows filesystem.
 
 The cmdlets in this module have been prefixed with the word "long" to distinguish them from the cmdlets published by microsoft.
 
@@ -65,4 +65,4 @@ Links:
 
 ## Note
 
-I do not work for or represent AlphaFS. This is a project that i made based on my own needs but you are free to fork and modify as needed. If you would like to suggest improvements please do, I will try to get to them as soon as i can.
+I do not work for or represent AlphaFS. This is a project that I made based on my own needs so feel free to fork and modify as needed. If you would like to suggest improvements please do, I will try to get to them as soon as I can.
