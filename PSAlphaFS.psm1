@@ -57,16 +57,16 @@ function Get-LongChildItem
         $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::ContinueOnException 
         $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::BasicSearch
         $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::LargeCache 
-        
+
         if($PSBoundParameters.Containskey('Recurse') )
         {
              $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Recursive 
         }     
-        if($PSBoundParameters.Containskey('Directory') )
+        if($PSBoundParameters.Containskey('Directory') -and (-not($PSBoundParameters.Containskey('File'))))
         {
             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Folders 
         }
-        if($PSBoundParameters.Containskey('File') )
+        if($PSBoundParameters.Containskey('file') -and (-not($PSBoundParameters.Containskey('Directory'))))
         {
             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Files 
         }
