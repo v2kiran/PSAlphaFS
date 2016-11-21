@@ -307,7 +307,7 @@ function Get-LongChildItem
                             }
                             Else
                             {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath
+                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N
                          
                             } 
                         }
@@ -451,7 +451,7 @@ function Get-LongChildItem
     {
         If ($privilegeEnabler) 
         {
-            $privilegeEnabler.Dispose()
+            $privilegeEnabler.Dispose() 
         }
     }#end
     
