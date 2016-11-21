@@ -78,8 +78,8 @@ function Get-LongChildItem
 
 
  
-        $privilege = [Alphaleonis.Win32.Security.Privilege]::Backup
-        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler($privilege)       
+        #$privilege = [Alphaleonis.Win32.Security.Privilege]::Backup
+        #$privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler($privilege)       
         
     }
     Process
