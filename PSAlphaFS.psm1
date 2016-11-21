@@ -57,23 +57,22 @@ function Get-LongChildItem
         $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::ContinueOnException 
         $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::BasicSearch
         $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::LargeCache 
+        
         if($PSBoundParameters.Containskey('Recurse') )
         {
              $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Recursive 
         }     
-        if($PSBoundParameters.Containskey('Include') )
+        if($PSBoundParameters.Containskey('Directory') )
         {
-            $Include | ForEach-Object {$Include_string += "`$_.Name -like '$_' -or " }
-            $Include_string = $Include_string -replace '-or\s$',''        
+            $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Folders 
         }
-        if($PSBoundParameters.Containskey('Exclude') )
+        if($PSBoundParameters.Containskey('File') )
         {
-            $Exclude | ForEach-Object {$Exclude_string += "`$_.Name -notlike '$_' -and " }
-            $Exclude_string = $Exclude_string -replace '-and\s$',''      
+            $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Files 
         }
-        if($PSBoundParameters.Containskey('Include') -and $PSBoundParameters.ContainsKey('Exclude') )
+        if(-not($PSBoundParameters.Containskey('Directory') -and $PSBoundParameters.ContainsKey('File') ))
         {
-            $Inc_Exc_String = '(' + $Include_string + ')' + ' -AND ' +  '(' + $Exclude_string + ')'     
+             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders 
         }        
 
 
@@ -92,342 +91,27 @@ function Get-LongChildItem
     
             if($Attributes -contains 'Directory')
             {
-                if ($Directory)
+                foreach ($N in @($DirObject::EnumerateFileSystemEntries($pItem,$Filter,$dirEnumOptions)))
                 {
-                     $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Folders 
-
-                    foreach ($N in @($DirObject::EnumerateFileSystemEntries($pItem, $FIlter, $dirEnumOptions)))
-                    {
-                        if($Include -and (-not $Exclude) )
-                        {     
-                            if($Name)
-                            {
-                                if($Recurse)
-                                {
-                                    $newpath = $pItem -Replace '\\','\\'
-
-                                    (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
-                                    Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                }
-                                Else
-                                {
-                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                    Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
-                                    Select-Object -ExpandProperty Name                                  
-                                }
-
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                Where-Object (& {[scriptblock]::create($Include_string) } $_ )                         
-                            }        
-                        
-
-                        }
-                        elseif($Exclude -and (-not $Include) )
-                        {   
-                            if($Name)
-                            {
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                       
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                Where-Object (& {[scriptblock]::create($Exclude_string) } $_ )                         
-                            }                                       
-                
-                        } 
-                        Elseif($Include -and $Exclude)
-                        {   
-                            if($Name)
-                            {
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                       
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ )                         
-                            }                                       
-                
-                        }                          
-                        Else
-                        {
-                            if($Name)
-                            {
-                                    if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                      
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N
-                         
-                            }                     
-                        
-                        }#if not include or exclude
+                    $filename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($N)
                     
-                    }#foreach file or folder
-            
-                }#if folder
-                Elseif($File)
-                {
-                    $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Files 
-                   foreach ($N in @($DirObject::EnumerateFileSystemEntries($pItem, $FIlter, $dirEnumOptions)))
+                    if ($include -and (-not(CompareExtension -Extension $include -Filename $filename)))
                     {
-                        if($Include -and (-not $Exclude) )
-                        {                 
-                            if($Name)
-                            {
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                      
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                Where-Object (& {[scriptblock]::create($Include_string) } $_ )                         
-                            }                         
-
-                        }
-                        elseif($Exclude -and (-not $Include) )
-                        {                     
-                            if($Name)
-                            {
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                      
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                Where-Object (& {[scriptblock]::create($Exclude_string) } $_ )                         
-                            }                
-                        } 
-                        Elseif($Include -and $Exclude)
-                        {   
-                            if($Name)
-                            {
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                        
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ )                         
-                            }                                       
-                
-                        }                                             
-                        Else
-                        {
-                            if($Name)
-                            {
-                                if($Recurse)
-                                {
-                                    $newpath = $pItem -Replace '\\','\\'
-
-                                    (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                    Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                }
-                                Else
-                                {
-                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                    Select-Object -ExpandProperty Name                                  
-                                }                       
-                            }
-                            Else
-                            {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N
-                         
-                            } 
-                        }
-                    }#foreach name            
-                }#else file
-                Else
-                {
-                    $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders 
-
-                    foreach ($N in @($DirObject::EnumerateFileSystemEntries($pItem, $FIlter, $dirEnumOptions)))
+                        continue
+                    }
+                    if ($exclude -and (CompareExtension -Extension $exclude -Filename $filename))
                     {
-                            if($Include -and (-not $Exclude) )
-                            {                 
-                                if($Name)
-                                {
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                            Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }
-                       
-                                }
-                                Else
-                                {
-                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                    Where-Object (& {[scriptblock]::create($Include_string) } $_ )                         
-                                }                           
-
-                            }
-                            elseif($Exclude -and (-not $Include) )
-                            {                     
-                                if($Name)
-                                {                                   
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                            Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                                     
-                                                                                           
-                                }
-                                Else
-                                {
-                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                    Where-Object (& {[scriptblock]::create($Exclude_string) } $_ )                         
-                                }                
-                            }
-                            Elseif($Include -and $Exclude)
-                            {   
-                                if($Name)
-                                {
- 
-                                     if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                            Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
-                                        Select-Object -ExpandProperty Name                                  
-                                    }                                   
-                                                        
-                                }
-                                Else
-                                {
-                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                    Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ )                         
-                                }                                       
-                
-                            }                                                  
-                            Else
-                            {
-                                if($Name)
-                                {
-                                    if($Recurse)
-                                    {
-                                        $newpath = $pItem -Replace '\\','\\'
-
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
-                                    }
-                                    Else
-                                    {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
-                                        Select-Object -ExpandProperty Name                                  
-                                    }
-                                                     
-                                }
-                                Else
-                                {
-                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N
-                               
-                                } 
-                        
-                            }
-                        }#foreach name 
-               
-                }#else process both files & folders
+                        continue
+                    }      
+                    if($name)
+                    {
+                        $N.Replace($pitem,'') -replace '^\\'
+                    }
+                    Else
+                    {
+                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N
+                    }
+            }
             
             }#If path is a folder
             Else
@@ -1135,7 +819,16 @@ function Move-LongItem
 
 }#end function 
 
-
+function CompareExtension([string[]]$Extension, $Filename)
+    {
+        foreach ($p in $Extension)
+        {
+            $wc = New-Object System.Management.Automation.WildcardPattern -ArgumentList ($p, [System.Management.Automation.WildcardOptions]::IgnoreCase) 
+            if ($wc.IsMatch($Filename)) {return $true}
+        }
+    
+    }
 
 Set-Alias -Name ldir -Value Get-LongChildItem
 Set-Alias -Name lgci -Value Get-LongChildItem
+
