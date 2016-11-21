@@ -70,11 +70,14 @@ function Get-LongChildItem
         {
             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Files 
         }
-        if(-not($PSBoundParameters.Containskey('Directory') -and $PSBoundParameters.ContainsKey('File') ))
+        if(-not($PSBoundParameters.Containskey('Directory')) -and (-not($PSBoundParameters.ContainsKey('File')) ))
         {
              $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders 
         }        
-
+        if($PSBoundParameters.Containskey('Directory') -and $PSBoundParameters.ContainsKey('File') )
+        {
+             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders 
+        }  
 
  
         $privilege = [Alphaleonis.Win32.Security.Privilege]::Backup
@@ -819,15 +822,6 @@ function Move-LongItem
 
 }#end function 
 
-function CompareExtension([string[]]$Extension, $Filename)
-    {
-        foreach ($p in $Extension)
-        {
-            $wc = New-Object System.Management.Automation.WildcardPattern -ArgumentList ($p, [System.Management.Automation.WildcardOptions]::IgnoreCase) 
-            if ($wc.IsMatch($Filename)) {return $true}
-        }
-    
-    }
 
 Set-Alias -Name ldir -Value Get-LongChildItem
 Set-Alias -Name lgci -Value Get-LongChildItem
