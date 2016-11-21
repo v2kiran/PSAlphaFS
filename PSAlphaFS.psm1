@@ -219,20 +219,20 @@ function Get-LongChildItem
                                     {
                                         $newpath = $pItem -Replace '\\','\\'
 
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                         Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
                                         Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
                                     }
                                     Else
                                     {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                         Where-Object (& {[scriptblock]::create($Include_string) } $_ ) |
                                         Select-Object -ExpandProperty Name                                  
                                     }                      
                             }
                             Else
                             {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                 Where-Object (& {[scriptblock]::create($Include_string) } $_ )                         
                             }                         
 
@@ -245,20 +245,20 @@ function Get-LongChildItem
                                     {
                                         $newpath = $pItem -Replace '\\','\\'
 
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                         Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
                                         Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
                                     }
                                     Else
                                     {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                         Where-Object (& {[scriptblock]::create($Exclude_string) } $_ ) |
                                         Select-Object -ExpandProperty Name                                  
                                     }                      
                             }
                             Else
                             {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                 Where-Object (& {[scriptblock]::create($Exclude_string) } $_ )                         
                             }                
                         } 
@@ -270,20 +270,20 @@ function Get-LongChildItem
                                     {
                                         $newpath = $pItem -Replace '\\','\\'
 
-                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                        (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                         Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
                                         Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
                                     }
                                     Else
                                     {
-                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                         Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ ) |
                                         Select-Object -ExpandProperty Name                                  
                                     }                        
                             }
                             Else
                             {
-                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                 Where-Object (& {[scriptblock]::create($Inc_Exc_String) } $_ )                         
                             }                                       
                 
@@ -296,12 +296,12 @@ function Get-LongChildItem
                                 {
                                     $newpath = $pItem -Replace '\\','\\'
 
-                                    (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                    (New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                     Select-Object -ExpandProperty FullName )  -replace "$newpath\\" , ''                                   
                                 }
                                 Else
                                 {
-                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N.fullpath | 
+                                    New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N | 
                                     Select-Object -ExpandProperty Name                                  
                                 }                       
                             }
