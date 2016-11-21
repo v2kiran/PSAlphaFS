@@ -1136,7 +1136,6 @@ function Move-LongItem
 }#end function 
 
 
-. $PSScriptRoot\Helpers\InvokeGenericMethod.ps1
 
 Set-Alias -Name ldir -Value Get-LongChildItem
 Set-Alias -Name lgci -Value Get-LongChildItem
