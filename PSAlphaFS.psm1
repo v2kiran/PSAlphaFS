@@ -55,7 +55,12 @@ function Get-LongChildItem
         $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
 
         $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::ContinueOnException 
-        
+        $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::BasicSearch
+        $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::LargeCache 
+        if($PSBoundParameters.Containskey('Recurse') )
+        {
+             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Recursive 
+        }     
         if($PSBoundParameters.Containskey('Include') )
         {
             $Include | ForEach-Object {$Include_string += "`$_.Name -like '$_' -or " }
@@ -70,10 +75,7 @@ function Get-LongChildItem
         {
             $Inc_Exc_String = '(' + $Include_string + ')' + ' -AND ' +  '(' + $Exclude_string + ')'     
         }        
-        if($PSBoundParameters.Containskey('Recurse') )
-        {
-             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Recursive 
-        }
+
 
  
         $privilege = [Alphaleonis.Win32.Security.Privilege]::Backup
