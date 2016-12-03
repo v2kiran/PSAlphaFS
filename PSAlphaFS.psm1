@@ -822,6 +822,103 @@ function Move-LongItem
 
 }#end function 
 
+function Mount-LongItem
+{
+
+	[CmdletBinding(DefaultParameterSetName = 'Simple')]
+	Param
+	(
+		# Specify the Local Drive the NetworkShare is to be Mapped to    
+		[Parameter(Mandatory=$true,
+				ValueFromPipelineByPropertyName=$true,
+		Position=0)]
+		[String]
+		$DriveLetter,
+		
+		# Specify the NetworkShare that is to be mapped   
+		[Parameter(Mandatory=$true,
+				ValueFromPipelineByPropertyName=$true,
+		Position=1)]
+		[String]
+		$NetWorkShare,
+		
+		# Specify the NetworkShare that is to be mapped   
+		[Parameter(Mandatory=$true,
+				ValueFromPipelineByPropertyName=$true,
+				ParameterSetName = 'Credential',
+		Position=2)]
+		[System.Management.Automation.PSCredential]
+		$Credential
+		
+			
+				
+          
+	)    
+
+	Begin
+	{
+     
+	}
+	Process
+	{
+		if($DriveLetter -notmatch '[aA-zZ]:'){$DriveLetter = "$DriveLetter`:"}
+		
+		if($PSCmdlet.ParameterSetName -eq 'Credential')
+		{
+			$NetWorkCreds = New-Object System.Net.NetworkCredential -ArgumentList @($Credential.UserName, $Credential.Password)
+			$Domain = $Credential.GetNetworkCredential().domain
+			
+			if($Domain)
+			{
+				$NetWorkCreds.Domain = $Domain
+			}
+			elseif($env:USERDOMAIN)
+			{
+				$NetWorkCreds.Domain = $env:USERDOMAIN
+			}
+
+			#map drive
+			try
+			{
+				Write-Verbose ("Mount-LongItem:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}'] with Credentials '[{2}']" -f $NetWorkShare,$DriveLetter, $Credential.UserName)
+				$MpaDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare, $Credential, $false, $true, $true)
+			
+			}
+			catch
+			{
+				throw $_.exception.innerexception	 
+			}
+			
+			
+			
+		}# Parameterset Credential
+		
+		if($PSCmdlet.ParameterSetName -eq 'Simple')
+		{
+			#map drive
+			try
+			{
+				Write-Verbose ("Mount-LongItem:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}']" -f $NetWorkShare,$DriveLetter)
+				$MpaDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare)
+			
+			}
+			catch
+			{
+
+				throw $_.exception.innerexception
+				 
+			}
+			
+		}# Parameterset Simple
+        
+	}#Process
+	End
+	{
+
+	}#end    
+}#End Function
+
+
 
 Set-Alias -Name ldir -Value Get-LongChildItem
 Set-Alias -Name lgci -Value Get-LongChildItem
