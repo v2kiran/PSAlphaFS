@@ -919,6 +919,73 @@ function Mount-LongItem
 }#End Function
 
 
+function DisMount-LongItem
+{
+
+	[CmdletBinding()]
+	Param
+	(
+		# Specify the Local Drive the NetworkShare is to be Mapped to    
+		[Parameter(Mandatory=$true,
+				ValueFromPipelineByPropertyName=$true,
+				ValueFromPipeline = $true,
+		Position=0)]
+		[String]
+		$DriveLetter,
+		
+		# Specify if the existing Connections to a share are to be closed
+		[Switch]
+		$Force
+      
+	)    
+
+	Begin
+	{
+     
+	}
+	Process
+	{
+		if($DriveLetter -notmatch '[aA-zZ]:'){$DriveLetter = "$DriveLetter`:"}
+					
+		#map drive
+		try
+		{
+
+			if($Force)
+			{
+				 
+				Write-Verbose ("DisMount-LongItem:`t Force Detected...Closing open network connections and Removing Mapped Drive ['{0}']" -f $DriveLetter)
+				$RemoveDrive = [Alphaleonis.Win32.Network.Host]::DisconnectDrive($DriveLetter, $true, $true)
+			}
+			Else
+			{
+				Write-Verbose ("DisMount-LongItem:`t Removing Mapped Drive ['{0}']" -f $DriveLetter)   
+				$RemoveDrive = [Alphaleonis.Win32.Network.Host]::DisconnectDrive($DriveLetter, $false, $true)
+			}
+			
+		}
+		catch
+		{
+			  if($_.Exception.InnerException -match 'This network connection has files open or requests pending')
+			  {
+					throw 'This network connection has files open or requests pending...use the "-Force" switch to close existing connections without warning'
+			  }
+			  else
+			  {
+					throw $_.Exception.InnerException
+			  }
+
+		}
+			
+	   
+	}#Process
+	End
+	{
+
+	}#end    
+}#End Function
+
+
 
 Set-Alias -Name ldir -Value Get-LongChildItem
 Set-Alias -Name lgci -Value Get-LongChildItem
