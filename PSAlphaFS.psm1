@@ -881,7 +881,7 @@ function Mount-LongItem
 			try
 			{
 				Write-Verbose ("Mount-LongItem:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}'] with Credentials '[{2}']" -f $NetWorkShare,$DriveLetter, $Credential.UserName)
-				$MpaDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare, $Credential, $false, $true, $true)
+				$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare, $Credential, $false, $true, $true)
 			
 			}
 			catch
@@ -899,7 +899,7 @@ function Mount-LongItem
 			try
 			{
 				Write-Verbose ("Mount-LongItem:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}']" -f $NetWorkShare,$DriveLetter)
-				$MpaDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare)
+				$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare)
 			
 			}
 			catch
