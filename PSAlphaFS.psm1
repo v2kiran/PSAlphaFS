@@ -1024,6 +1024,70 @@ function Get-MappedDrives
 	}#end    
 }#End Function
 
+function Get-FreeDriveLetter
+{
+
+	[CmdletBinding(DefaultParameterSetName = 'First')]
+	Param
+	(  
+		# get the last available drive letter.   
+		[Parameter(ParameterSetName = 'Last')]
+		[Switch]
+		$Last	 
+	)    
+
+	Begin
+	{
+     
+	}
+	Process
+	{
+					
+		if($PSCmdlet.ParameterSetName -eq 'First')
+		{
+			#map drive
+			try
+			{
+				Write-Verbose ("Get-FreeDriveLetter:`t Listing the first free DriveLetter")
+				[Alphaleonis.Win32.Filesystem.DriveInfo]::GetFreeDriveLetter()
+			
+			}
+			catch
+			{
+
+				throw $_.exception.innerexception
+				 
+			}
+			
+		}# Parameterset First
+		
+		if($PSCmdlet.ParameterSetName -eq 'Last')
+		{
+			#map drive
+			try
+			{
+				Write-Verbose ("Get-FreeDriveLetter:`t Listing the Last free DriveLetter")
+				[Alphaleonis.Win32.Filesystem.DriveInfo]::GetFreeDriveLetter($true)
+			
+			}
+			catch
+			{
+
+				throw $_.exception.innerexception
+				 
+			}
+			
+		}# Parameterset Last		
+			
+		
+        
+	}#Process
+	End
+	{
+
+	}#end    
+}#End Function
+
 
 
 Set-Alias -Name ldir -Value Get-LongChildItem
