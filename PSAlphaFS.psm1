@@ -986,6 +986,45 @@ function DisMount-LongItem
 }#End Function
 
 
+function Get-MappedDrives
+{
+
+	[CmdletBinding()]
+	Param
+	(   
+	)    
+
+	Begin
+	{
+     
+	}
+	Process
+	{
+					
+		#map drive
+		try
+		{
+
+			  [Alphaleonis.Win32.Filesystem.DriveInfo]::GetDrives() | Where-Object DriveType -eq 'Network'
+			
+		}
+		catch
+		{
+
+			 throw $_.Exception.InnerException
+			  
+		}
+			
+		
+        
+	}#Process
+	End
+	{
+
+	}#end    
+}#End Function
+
+
 
 Set-Alias -Name ldir -Value Get-LongChildItem
 Set-Alias -Name lgci -Value Get-LongChildItem
