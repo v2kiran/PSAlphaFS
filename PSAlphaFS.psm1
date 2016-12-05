@@ -289,26 +289,55 @@ function Copy-LongItem
         $Destination,
         
         [Switch]
-        $Force                  
+        $Force,
+
+        # If the source file is a symbolic link, 
+        # the destination file is also a symbolic link pointing to the same file that the source symbolic link is pointing to.
+        [Switch]
+        $CopySymbolicLink,
+
+        # The copy operation is performed using unbuffered I/O, bypassing system I/O cache resources. Recommended for very large file transfers.
+        [Switch]
+        $NoBuffering,
+
+        # An attempt to copy an encrypted file will succeed even if the destination copy cannot be encrypted.     
+        [Switch]
+        $AllowDecryptedDestination,                                 
     )
 
     Begin
     {
         $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
         $FileObject = [Alphaleonis.Win32.Filesystem.File]
+        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+
         $copyOptions = [Alphaleonis.Win32.Filesystem.CopyOptions]::FailIfExists
+        if($PSBoundParameters.Containskey('CopySymbolicLink') )
+        {
+             $copyOptions = $copyOptions -bor [Alphaleonis.Win32.Filesystem.CopyOptions]::CopySymbolicLink
+        }  
+        if($PSBoundParameters.Containskey('NoBuffering') )
+        {
+             $copyOptions = $copyOptions -bor [Alphaleonis.Win32.Filesystem.CopyOptions]::NoBuffering
+        }  
+        if($PSBoundParameters.Containskey('AllowDecryptedDestination') )
+        {
+             $copyOptions = $copyOptions -bor [Alphaleonis.Win32.Filesystem.CopyOptions]::AllowDecryptedDestination
+        }                       
+        
     }
     Process
     {       
         $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
         $Attributes = ($PathObject.Attributes  -split ',').trim() 
         
-        $basename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Path)
-        $dBasename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Destination)
-        $dParent =  [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Destination)
+        $basename = $PathFSObject::GetFileName($Path)
+        $dBasename = $PathFSObject::GetFileName($Destination)
+        $dParent =  $PathFSObject::GetDirectoryName($Destination)
         
-        $isFile = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($dBasename) ){$true}else {$false} 
+        $isFile = if($PathFSObject::HasExtension($dBasename) ){$true}else {$false} 
         
+        # Create the directory tree before the copy
         if($isFile)
         {
             $Destination_isFile = $true
@@ -327,16 +356,14 @@ function Copy-LongItem
             } 
             Else
             {
-                $Destination = [Alphaleonis.Win32.Filesystem.Path]::Combine($Destination, $basename) 
+                $Destination = $PathFSObject::Combine($Destination, $basename) 
                 
             }
                                    
         }#destination is a folder
         
 
-
- 
-                    
+                 
         if($Force){$Overwrite = $true}else{$Overwrite = $false }
             
         if($Attributes -contains 'Directory')
@@ -533,6 +560,7 @@ function New-LongItem
         $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
         $FileObject = [Alphaleonis.Win32.Filesystem.File]
         $FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
+        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
 
     }
     Process
@@ -541,9 +569,9 @@ function New-LongItem
         
         foreach ($pItem in $Path)
         {
-            $Baseobj = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($pItem) 
-            $Parent  = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($pItem)
-            $isFile = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($Baseobj) ){$true}else {$false}             
+            $Baseobj = $PathFSObject::GetFileName($pItem) 
+            $Parent  = $PathFSObject::GetDirectoryName($pItem)
+            $isFile = if($PathFSObject::HasExtension($Baseobj) ){$true}else {$false}             
         
             if($PSCmdlet.ParameterSetName -eq 'Path')
             {
@@ -710,16 +738,17 @@ function Move-LongItem
         $ReplaceExisting = [Alphaleonis.Win32.Filesystem.MoveOptions]::ReplaceExisting
         $FileObject = [Alphaleonis.Win32.Filesystem.File]
         $DirectoryObject = [Alphaleonis.Win32.Filesystem.Directory]
+        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
     }
     Process
     {       
-        $Parent = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Path)
-        $basename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Path)
-        $dParent = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Destination)
-        $dBasename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Destination)
+        $Parent = $PathFSObject::GetDirectoryName($Path)
+        $basename = $PathFSObject::GetFileName($Path)
+        $dParent = $PathFSObject::GetDirectoryName($Destination)
+        $dBasename = $PathFSObject::GetFileName($Destination)
 
-        $isFile = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($Basename) ){$true}else {$false} 
-        $isFile_destination = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($dBasename) ){$true}else {$false} 
+        $isFile = if($PathFSObject::HasExtension($Basename) ){$true}else {$false} 
+        $isFile_destination = if($PathFSObject::HasExtension($dBasename) ){$true}else {$false} 
         
         if($isFile)
         {
@@ -754,19 +783,15 @@ function Move-LongItem
 
                 if($DirectoryObject::Exists($Destination ))
                 {
-                    $NewPath = [Alphaleonis.Win32.Filesystem.Path]::Combine($destination, $basename) 
+                    $NewPath = $PathFSObject::Combine($destination, $basename) 
                 }
                 Else
                 {
                     $NewPath = $Destination
                 }
-                
-                
-                
-            }             
+                               
+            }# destination is a directory             
             
-
-
         }#basename is a directory
         
         
@@ -829,7 +854,7 @@ function Mount-LongItem
 	[CmdletBinding(DefaultParameterSetName = 'Simple')]
 	Param
 	(
-		# Specify the Local Drive the NetworkShare is to be Mapped to    
+		# Specify the Local Drive the NetworkShare is to be Mapped to          
 		[Parameter(Mandatory=$true,
 				ValueFromPipelineByPropertyName=$true,
 		Position=0)]
