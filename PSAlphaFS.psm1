@@ -80,8 +80,7 @@ function Get-LongChildItem
         }  
 
  
-        $privilege = [Alphaleonis.Win32.Security.Privilege]::Backup
-        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler($privilege)       
+        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)       
         
     }
     Process
@@ -170,8 +169,7 @@ function Get-LongItem
     Begin
     {
         $DirObject = [Alphaleonis.Win32.Filesystem.Directory]    
-        $privilege = [Alphaleonis.Win32.Security.Privilege]::Backup
-        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler($privilege)         
+        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)         
     }
     Process
     {
@@ -228,8 +226,8 @@ function Rename-LongItem
     }
     Process
     {       
-        $Parent = Split-Path -Path $Path -Parent
-        $NewPath = Join-Path -Path $Parent -ChildPath $NewName
+        $Parent = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Path)
+        $NewPath = [Alphaleonis.Win32.Filesystem.Path]::Combine($Parent, $NewName) 
         $ReplaceExisting = [Alphaleonis.Win32.Filesystem.MoveOptions]::ReplaceExisting
         
         if($PSCmdlet.ShouldProcess($NewPath,"Rename File: $Path") )
@@ -305,13 +303,13 @@ function Copy-LongItem
         $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
         $Attributes = ($PathObject.Attributes  -split ',').trim() 
         
-        $basename = Split-Path -Path $Path -Leaf 
-        $dBasename = Split-Path -Path $Destination -Leaf
-        $dParent =  Split-Path -Path $Destination -Parent
+        $basename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Path)
+        $dBasename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Destination)
+        $dParent =  [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Destination)
         
+        $isFile = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($dBasename) ){$true}else {$false} 
         
-        
-        if($dBasename -match '.*\.\w{2,4}$')
+        if($isFile)
         {
             $Destination_isFile = $true
             if( -not ( $DirObject::Exists($dParent)))
@@ -329,7 +327,8 @@ function Copy-LongItem
             } 
             Else
             {
-                $Destination = Join-Path -Path $Destination -ChildPath $basename  
+                $Destination = [Alphaleonis.Win32.Filesystem.Path]::Combine($Destination, $basename) 
+                
             }
                                    
         }#destination is a folder
@@ -435,8 +434,7 @@ function Remove-LongItem
         $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
         $FileObject = [Alphaleonis.Win32.Filesystem.File]
         $DirOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders
-        $privilege = [Alphaleonis.Win32.Security.Privilege]::Backup
-        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler($privilege)       
+        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)       
         
     }
     Process
@@ -543,9 +541,9 @@ function New-LongItem
         
         foreach ($pItem in $Path)
         {
-            $Baseobj = Split-Path -Path $pItem -Leaf 
-            $Parent  = Split-Path -Path $pItem -Parent
-            $isFile = [regex]::Match($Baseobj , '\.\w{2,4}$') | Select-Object -ExpandProperty Success            
+            $Baseobj = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($pItem) 
+            $Parent  = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($pItem)
+            $isFile = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($Baseobj) ){$true}else {$false}             
         
             if($PSCmdlet.ParameterSetName -eq 'Path')
             {
@@ -715,17 +713,20 @@ function Move-LongItem
     }
     Process
     {       
-        $Parent = Split-Path -Path $Path -Parent
-        $basename = Split-Path -Path $Path -Leaf
-        $dParent = Split-Path -Path $Destination -Parent
-        $dBasename = Split-Path -Path $Destination -Leaf
+        $Parent = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Path)
+        $basename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Path)
+        $dParent = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Destination)
+        $dBasename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($Destination)
+
+        $isFile = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($Basename) ){$true}else {$false} 
+        $isFile_destination = if([Alphaleonis.Win32.Filesystem.path]::HasExtension($dBasename) ){$true}else {$false} 
         
-        if($Basename -match '\.\w{2,4}$')
+        if($isFile)
         {
             #Basename is a file so destination has to be a file
             $Basename_isFile = $true
             
-            if ($dBasename -match '\.\w{2,4}$')
+            if ($isFile_destination)
             {
                 $Destination_isFile = $true
                 $NewPath = $Destination 
@@ -740,7 +741,7 @@ function Move-LongItem
         {
             #basename is a folder so check the destination basename
             $Basename_isDirectory = $true
-            if ($dBasename -match '\.\w{2,4}$')
+            if ($isFile_destination)
             {
                 Write-Warning ("Move-LongItem:`tThe source is a directory so please specify a directory as the destination")
                 break
@@ -753,7 +754,7 @@ function Move-LongItem
 
                 if($DirectoryObject::Exists($Destination ))
                 {
-                    $NewPath = Join-Path -Path $Destination -ChildPath $basename 
+                    $NewPath = [Alphaleonis.Win32.Filesystem.Path]::Combine($destination, $basename) 
                 }
                 Else
                 {
