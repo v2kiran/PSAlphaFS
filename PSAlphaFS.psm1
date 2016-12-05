@@ -481,7 +481,7 @@ function Remove-LongItem
             if($Recurse)
             {
                 Write-Verbose ("Remove-LongItem:`t Deleting directory '{0}' recursively" -f $Path)
-                $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly)            
+                $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)            
             }
             Else
             {
@@ -492,7 +492,7 @@ function Remove-LongItem
                 Else
                 {
                     Write-Verbose ("Remove-LongItem:`t Deleting empty directory '{0}'" -f $Path)
-                    $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly)                
+                    $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)                
                 }
             
             
@@ -504,7 +504,7 @@ function Remove-LongItem
              try
              {
                  Write-Verbose ("Remove-LongItem:`t Deleting file '{0}'..." -f $Path)
-                 $FileObject::Delete($Path, $IgnoreReadOnly)  
+                 $FileObject::Delete($Path, $IgnoreReadOnly, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)  
              }
              catch [Alphaleonis.Win32.Filesystem.FileReadOnlyException]
              {
