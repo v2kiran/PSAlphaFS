@@ -223,11 +223,13 @@ function Rename-LongItem
 
     Begin
     {
+        $DirObject = [Alphaleonis.Win32.Filesystem.Directory] 
+        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
     }
     Process
     {       
-        $Parent = [Alphaleonis.Win32.Filesystem.Path]::GetDirectoryName($Path)
-        $NewPath = [Alphaleonis.Win32.Filesystem.Path]::Combine($Parent, $NewName) 
+        $Parent = $PathFSObject::GetDirectoryName($Path)
+        $NewPath = $PathFSObject::Combine($Parent, $NewName) 
         $ReplaceExisting = [Alphaleonis.Win32.Filesystem.MoveOptions]::ReplaceExisting
         
         if($PSCmdlet.ShouldProcess($NewPath,"Rename File: $Path") )
@@ -235,18 +237,18 @@ function Rename-LongItem
             if($Force)
             {
                 Write-Verbose ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path,$NewPath)
-                [Alphaleonis.Win32.Filesystem.Directory]::Move($Path, $NewPath,$ReplaceExisting)              
+                $DirObject::Move($Path, $NewPath,$ReplaceExisting)              
             }
             Else
             {
-                if([Alphaleonis.Win32.Filesystem.Directory]::Exists($NewPath))
+                if($DirObject::Exists($NewPath))
                 {
                     Write-Warning ("Rename-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $NewPath)
                 }
                 Else
                 {
                     Write-Verbose ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path,$NewPath)
-                    [Alphaleonis.Win32.Filesystem.Directory]::Move($Path, $NewPath)                 
+                    $DirObject::Move($Path, $NewPath)                 
                 }
 
             }
@@ -310,19 +312,20 @@ function Copy-LongItem
         $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
         $FileObject = [Alphaleonis.Win32.Filesystem.File]
         $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+        $copyFsObject = [Alphaleonis.Win32.Filesystem.CopyOptions]
 
-        $copyOptions = [Alphaleonis.Win32.Filesystem.CopyOptions]::FailIfExists
+        $copyOptions = $copyFsObject::FailIfExists
         if($PSBoundParameters.Containskey('CopySymbolicLink') )
         {
-             $copyOptions = $copyOptions -bor [Alphaleonis.Win32.Filesystem.CopyOptions]::CopySymbolicLink
+             $copyOptions = $copyOptions -bor $copyFsObject::CopySymbolicLink
         }  
         if($PSBoundParameters.Containskey('NoBuffering') )
         {
-             $copyOptions = $copyOptions -bor [Alphaleonis.Win32.Filesystem.CopyOptions]::NoBuffering
+             $copyOptions = $copyOptions -bor $copyFsObject::NoBuffering
         }  
         if($PSBoundParameters.Containskey('AllowDecryptedDestination') )
         {
-             $copyOptions = $copyOptions -bor [Alphaleonis.Win32.Filesystem.CopyOptions]::AllowDecryptedDestination
+             $copyOptions = $copyOptions -bor $copyFsObject::AllowDecryptedDestination
         }                       
         
     }
