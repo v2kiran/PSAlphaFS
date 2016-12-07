@@ -48,7 +48,25 @@
             <Wrap/>
             <TableColumnItems>
               <TableColumnItem>
-                <ScriptBlock>        					if ( ($_.Attributes  -split ',').trim().contains('Directory') ){'Directory'}Else{'File'}        				</ScriptBlock>
+                <ScriptBlock>   
+                  if ( $_.EntryInfo.IsDirectory )
+                  {
+                      return 'SymLink'
+                  }
+                  Else
+                  {
+                      if ( $_.EntryInfo.IsSymbolicLink )
+                      {
+                          return 'SymLink'
+                      }
+                      Else
+                      {
+                          return 'File'
+                      }
+                  }
+       				
+                        
+                        </ScriptBlock>
               </TableColumnItem>
               <TableColumnItem>
                 <ScriptBlock>                      [String]::Format("{0,10}  {1,8}", $_.LastWriteTime.ToString("d"), $_.LastWriteTime.ToString("t"))                  </ScriptBlock>
