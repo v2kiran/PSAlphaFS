@@ -51,7 +51,7 @@
                 <ScriptBlock>   
                   if ( $_.EntryInfo.IsDirectory )
                   {
-                      return 'SymLink'
+                      return 'Directory'
                   }
                   Else
                   {
