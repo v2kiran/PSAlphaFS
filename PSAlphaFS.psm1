@@ -1373,6 +1373,44 @@ function Get-LongFreeDriveLetter
 	}#end    
 }#End Function
 
+function Get-LongDiskSpace
+{
+
+	[CmdletBinding()]
+	Param
+	(   
+	)    
+
+	Begin
+	{
+     
+	}
+	Process
+	{
+					
+		#List drive
+		try
+		{
+
+			  [Alphaleonis.Win32.Filesystem.DriveInfo]::GetDrives()
+			
+		}
+		catch
+		{
+
+			 throw $_.Exception.InnerException
+			  
+		}
+			
+		
+        
+	}#Process
+	End
+	{
+
+	}#end    
+}#End Function
+
 
 
 Set-Alias -Name ldir -Value Get-LongChildItem
