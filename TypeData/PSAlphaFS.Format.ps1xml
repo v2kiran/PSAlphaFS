@@ -65,7 +65,7 @@
       </TableControl>
     </View>
     <View>
-      <Name>DiskSpaceInfo</Name>
+      <Name>DriveInfoTableView</Name>
       <ViewSelectedBy>
         <SelectionSetName>AlphaFSFileSystemDriveTypes</SelectionSetName>
       </ViewSelectedBy>
@@ -148,6 +148,92 @@
                   </TableRowEntry>
         </TableRowEntries>
       </TableControl>
-    </View>    
+    </View>  
+   <View>
+      <Name>DriveInfoListView</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>AlphaFSFileSystemDriveTypes</SelectionSetName>
+      </ViewSelectedBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <Label>DriveLetter</Label>
+                <ScriptBlock>
+                  return ($_.Name)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <PropertyName>VolumeLabel</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>FileSystem</Label>
+                <ScriptBlock>
+                  return ($_.DriveFormat)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <PropertyName>DriveType</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>FreeSpace</Label>
+                <ScriptBlock>
+                  return ($_.TotalFreeSpace)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Size</Label>
+                <ScriptBlock>
+                  return ($_.TotalSize)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <PropertyName>DosDeviceName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>IsUnc</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>IsVolume</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>VolumeInfo</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>ClusterSize</Label>
+                <ScriptBlock>
+                  return ($_.DiskSpaceInfo.ClusterSize)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>BytesPerSector</Label>
+                <ScriptBlock>
+                  return ($_.DiskSpaceInfo.BytesPerSector)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>NumberOfFreeClusters</Label>
+                <ScriptBlock>
+                  return ($_.DiskSpaceInfo.NumberOfFreeClusters)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>SectorsPerCluster</Label>
+                <ScriptBlock>
+                  return ($_.DiskSpaceInfo.SectorsPerCluster)
+                </ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>TotalNumberOfClusters</Label>
+                <ScriptBlock>
+                  return ($_.DiskSpaceInfo.TotalNumberOfClusters)
+                </ScriptBlock>
+              </ListItem>              
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>      
   </ViewDefinitions>
 </Configuration>
