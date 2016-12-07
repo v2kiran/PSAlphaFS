@@ -534,175 +534,431 @@ function Remove-LongItem
 # .ExternalHelp PSAlphafs.psm1-help.xml
 function New-LongItem
 {
-    [CmdletBinding(DefaultParameterSetName = 'Path')]
-    Param
-    (
-        # The Path to the File or Folder
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   ValueFromPipeline=$true,ParameterSetName = 'Path',
-                   Position=0)]
-        [String[]]
-        [Parameter(ParameterSetName = 'Name',Mandatory = $false)]
-        $Path = $pwd,
+	[CmdletBinding(DefaultParameterSetName = 'Path')]
+	Param
+	(
+		# The Path to the File or Folder
+		[Parameter(Mandatory=$true,
+				ValueFromPipelineByPropertyName=$true,
+				ValueFromPipeline=$true,ParameterSetName = 'Path',
+			 Position=0)]
+		[String[]]
+		[Parameter(ParameterSetName = 'Name',Mandatory = $false)]
+		$Path = $pwd,
           
-        [ValidateSet('Directory','File')]
-        [String]
-        $ItemType,
-
-        [Parameter(Mandatory=$true,ParameterSetName = 'Name')]
-        [String]
-        $Name,
+		[ValidateSet('Directory','File','SymbolicLink','HardLink')]
+		[String]
+		$ItemType,
+		
+		[Alias('Target','RealFile')]
+		[Parameter()]
+		[String]
+		$Value,
+		
+		[Alias('LinkName','Link')]		
+		[Parameter(Mandatory=$true,ParameterSetName = 'Name')]
+		[String]
+		$Name,
         
-        [Switch]
-        $Force                  
-    )
+		[Switch]
+		$Force                  
+	)
 
-    Begin
-    {
-        $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
-        $FileObject = [Alphaleonis.Win32.Filesystem.File]
-        $FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
-        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+	Begin
+	{
+		$DirObject = [Alphaleonis.Win32.Filesystem.Directory]
+		$FileObject = [Alphaleonis.Win32.Filesystem.File]
+		$FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
+		$PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+		$linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
 
-    }
-    Process
-    {       
+		
+		$privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler -ArgumentList ([Alphaleonis.Win32.Security.Privilege]::CreateSymbolicLink, $null)  
+
+	}
+	Process
+	{       
 
         
-        foreach ($pItem in $Path)
-        {
-            $Baseobj = $PathFSObject::GetFileName($pItem) 
-            $Parent  = $PathFSObject::GetDirectoryName($pItem)
-            $isFile = if($PathFSObject::HasExtension($Baseobj) ){$true}else {$false}             
-        
-            if($PSCmdlet.ParameterSetName -eq 'Path')
-            {
+		foreach ($pItem in $Path)
+		{
          
-                if( ($ItemType -eq 'File') -or ($isFile) )
-                {
-                    $FilePath = $pItem
+        
+			if($PSCmdlet.ParameterSetName -eq 'Path')
+			{
+				$Baseobj = $PathFSObject::GetFileName($pItem) 
+				$Parent  = $PathFSObject::GetDirectoryName($pItem)
+				$isFile = if($PathFSObject::HasExtension($Baseobj) ){$true}else {$false} 
+				
+				$RealFileBaseobj = $PathFSObject::GetFileName($value) 
+				$RealFileParent  = $PathFSObject::GetDirectoryName($value)
+				$isFile_Real = if($PathFSObject::HasExtension($RealFileBaseobj) ){$true}else {$false}				
+				
+			       
+				if( ($ItemType -eq 'File') -and ($isFile) )
+				{
+					$FilePath = $pItem
                     
-                    if (-not ($DirObject::Exists($Parent)) )
-                    {
-                        $DirObject::CreateDirectory($Parent)
-                    }     
+					if (-not ($DirObject::Exists($Parent)) )
+					{
+						$DirObject::CreateDirectory($Parent)
+					}     
                                
-                    if($FileObject::Exists($FilePath))
-                    {
-                        if($Force)
-                        {                          
-                            $FileObject::Create($FilePath) | Out-Null
-                            $FileinfoObject::new($FilePath)
-                        }
-                        Else
-                        {
-                            Write-Warning ("New-LongItem: The file '{0}' already exists. Use '-Force' to overwrite" -f $FilePath)
-                        }
+					if($FileObject::Exists($FilePath))
+					{
+						if($Force)
+						{                          
+						     
+							if ($Value)
+							{
+								$FileObject::WriteAllText($FilePath, $Value) 
+							}
+							Else
+							{
+								$FileObject::Create($FilePath) | Out-Null
+								$FileinfoObject::new($FilePath)
+							}
+													
+						}
+						Else
+						{
+							Write-Warning ("New-LongItem: The file '{0}' already exists. Use '-Force' to overwrite" -f $FilePath)
+						}
             
-                    }# file exists
-                    Else
-                    {
-                        $FileObject::Create($FilePath)   | Out-Null
-                        $FileinfoObject::new($FilePath)             
-                    }
+					}# file exists
+					Else
+					{
+						     
+						if ($Value)
+						{
+							$FileObject::WriteAllText($FilePath, $Value) 
+						}
+						Else
+						{
+							$FileObject::Create($FilePath) | Out-Null
+							$FileinfoObject::new($FilePath)
+						}
+						
+						          
+					}
                      
-                }#isFile
-                Elseif( ($ItemType -eq 'Directory') -or  (-not $isFile) )
-                {
-                    $FolderPath = $pItem
+				}#isFile
+				Elseif( ($ItemType -eq 'Directory') -and  (-not $isFile) )
+				{
+					$FolderPath = $pItem
                 
-                    if($DirObject::Exists($FolderPath))
-                    {
-                        if($Force)
-                        {
-                            $DirObject::CreateDirectory($FolderPath)
-                        }
-                        Else
-                        {
-                            Write-Warning ("New-LongItem: The Directory '{0}' already exists. Use '-Force' to overwrite" -f $FolderPath)
-                        }
+					if($DirObject::Exists($FolderPath))
+					{
+						if($Force)
+						{
+							$DirObject::CreateDirectory($FolderPath)
+						}
+						Else
+						{
+							Write-Warning ("New-LongItem: The Directory '{0}' already exists. Use '-Force' to overwrite" -f $FolderPath)
+						}
             
-                    }# folder exists
-                    Else
-                    {
-                        $DirObject::CreateDirectory($FolderPath)                
-                    }
+					}# folder exists
+					Else
+					{
+						$DirObject::CreateDirectory($FolderPath)                
+					}
             
                         
-                }# if directory
-           
-            }#pscmdlet is path
-        
-            if($PSCmdlet.ParameterSetName -eq 'Name')
-            {
+				}# if directory
+				Elseif( ($ItemType -eq 'SymbolicLink')  )
+				{
+					$FilePath = $pItem
+					
+					if($isFile) 
+					{
+						$linktarget = $linktype::File
+						$checkfortarget = $FileObject::Exists($FilePath)
+					}
+					Else
+					{
+						$linktarget = $linktype::Directory
+						$checkfortarget = $DirObject::Exists($FilePath)
+					}
+					                    
+					if (-not ($DirObject::Exists($Parent)) )
+					{
+						$DirObject::CreateDirectory($Parent)
+					}     
+                               
+
+					if($checkfortarget)
+					{
+
+						  Write-Warning ("New-LongItem: The SymbolicLink '{0}' already exists." -f $FilePath)
+						
+					}# file exists
+					Else
+					{  
+						if( ($isFile_Real -and $isFile) -or ( (-not $isFile_Real) -and (-not $isFile)) )
+						{
+							Write-Verbose ("New-LongItem:`tCreating Symbolic Link ['{0}'] for ['{1}']" -f $FilePath,$Value)
+							$FileObject::CreateSymbolicLink($FilePath, $value, $linktarget)   						
+						}
+						Else
+						{
+							Write-Warning ("New-LongItem: Type(Folder\File) Mismatch between The SymbolicLink '{0}' & Target '{1}'." -f $FilePath,$Value)
+						}       
+					}
+					
+
  
-                if($ItemType -eq 'File')
-                {
-                    $FilePath = Join-Path -Path $pItem -ChildPath $Name
-                    
-                    if (-not ($DirObject::Exists($Parent)) )
-                    {
-                        $DirObject::CreateDirectory($Parent)
-                    }                    
-                
-                    if($FileObject::Exists($FilePath))
-                    {
-                        if($Force)
-                        {
-                            $FileObject::Create($FilePath) | Out-Null
-                            $FileinfoObject::new($FilePath)
-                        }
-                        Else
-                        {
-                            Write-Warning ("New-LongItem: The file '{0}' already exists. Use '-Force' to overwrite" -f $FilePath)
-                        }
-            
-                    }# file exists
-                    Else
-                    {
-                        $FileObject::Create($FilePath)  | Out-Null
-                        $FileinfoObject::new($FilePath)             
-                    }
+
                      
-                }#isFile
-                Elseif($ItemType -eq 'Directory')
-                {
-                    $FolderPath = Join-Path -Path $pItem -ChildPath $Name
+				}# if file and symboliclink	
+				Elseif( ($ItemType -eq 'HardLink') -and  $isFile )
+				{
+					$FilePath = $pItem
+					
+                    
+					if (-not ($DirObject::Exists($Parent)) )
+					{
+						$DirObject::CreateDirectory($Parent)
+					}     
+                               
+					if($FileObject::Exists($FilePath))
+					{
+
+						Write-Warning ("New-LongItem: The HardLink '{0}' already exists." -f $FilePath)
+						
+					}# file exists
+					Else
+					{  
+						try
+						{
+							if( ($isFile_Real -and $isFile) -or ( (-not $isFile_Real) -and (-not $isFile)) )
+							{
+								Write-Verbose ("New-LongItem:`tCreating Hard Link ['{0}'] for file ['{1}']" -f $FilePath,$Value)
+								$FileObject::CreateHardlink($FilePath, $Value)  						
+							}
+							Else
+							{
+								Write-Warning ("New-LongItem: Type(Folder\File) Mismatch between The Hardlink '{0}' & Target '{1}'.`nThe hardlink and Target must both be files" -f $FilePath,$Value)
+							}
+						
+						}
+						catch
+						{
+							Throw $_.exception.innerexception
+						}      
+					}
+                     
+				}# if file and Hardlink	
+				Elseif( ($ItemType -eq 'HardLink') -and  (-not $isFile) )	
+				{
+					$FilePath = $pItem
+					Write-Warning ("New-LongItem: The Hardlink to be created cannot be a folder '{0}'" -f $FilePath) 
+				}			
+           
+			}#pscmdlet is path
+        
+			if($PSCmdlet.ParameterSetName -eq 'Name')
+			{
+				if([Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Name))
+				{
+					  $pItem = $Name
+				}
+				Else
+				{
+					  $pItem = $PathFSObject::Combine($pItem, $Name)
+				}
+				
+				
+				$Baseobj = $PathFSObject::GetFileName($pItem) 
+				$Parent  = $PathFSObject::GetDirectoryName($pItem)
+				$isFile = if($PathFSObject::HasExtension($Baseobj) ){$true}else {$false} 
+				
+				$RealFileBaseobj = $PathFSObject::GetFileName($value) 
+				$RealFileParent  = $PathFSObject::GetDirectoryName($value)
+				$isFile_Real = if($PathFSObject::HasExtension($RealFileBaseobj) ){$true}else {$false}				
+				 
+				if($ItemType -eq 'File')
+				{
+					$FilePath = $pItem
+                    
+					if (-not ($DirObject::Exists($Parent)) )
+					{
+						$DirObject::CreateDirectory($Parent)
+					}                    
                 
-                    if($DirObject::Exists($FolderPath))
-                    {
-                        if($Force)
-                        {
-                            $DirObject::CreateDirectory($FolderPath)
-                        }
-                        Else
-                        {
-                            Write-Warning ("New-LongItem: The Directory '{0}' already exists. Use '-Force' to overwrite" -f $FolderPath)
-                        }
+					if($FileObject::Exists($FilePath))
+					{
+						if($Force)
+						{
+							
+						     
+							if ($Value)
+							{
+								$FileObject::WriteAllText($FilePath, $Value) 
+							}
+							Else
+							{
+								$FileObject::Create($FilePath) | Out-Null
+								$FileinfoObject::new($FilePath)
+							}
+													
+						}
+						Else
+						{
+							Write-Warning ("New-LongItem: The file '{0}' already exists. Use '-Force' to overwrite" -f $FilePath)
+						}
             
-                    }# folder exists
-                    Else
-                    {
-                        $DirObject::CreateDirectory($FolderPath)                
-                    }
+					}# file exists
+					Else
+					{
+						     
+						if ($Value)
+						{
+							$FileObject::WriteAllText($FilePath, $Value) 
+						}
+						Else
+						{
+							$FileObject::Create($FilePath) | Out-Null
+							$FileinfoObject::new($FilePath)
+						}						        
+					}
+                     
+				}#isFile
+				Elseif($ItemType -eq 'Directory')
+				{
+					$FolderPath = $PathFSObject::Combine($pItem, $Name)
+                
+					if($DirObject::Exists($FolderPath))
+					{
+						if($Force)
+						{
+							$DirObject::CreateDirectory($FolderPath)
+						}
+						Else
+						{
+							Write-Warning ("New-LongItem: The Directory '{0}' already exists. Use '-Force' to overwrite" -f $FolderPath)
+						}
+            
+					}# folder exists
+					Else
+					{
+						$DirObject::CreateDirectory($FolderPath)                
+					}
             
                         
-                }# if directory   
+				}# if directory  
+				
+				Elseif( ($ItemType -eq 'SymbolicLink') )
+				{
+					$FilePath = $pItem
+					
+					if($isFile) 
+					{
+						$linktarget = $linktype::File
+						$checkfortarget = $FileObject::Exists($FilePath)
+					}
+					Else
+					{
+						$linktarget = $linktype::Directory
+						$checkfortarget = $DirObject::Exists($FilePath)
+					}					
+				
+                    
+					if (-not ($DirObject::Exists($Parent)) )
+					{
+						$DirObject::CreateDirectory($Parent)
+					}   
+					
+					  
+                               
+					if($checkfortarget)
+					{
+
+						Write-Warning ("New-LongItem: The SymbolicLink '{0}' already exists." -f $FilePath)
+						
+					}# file exists
+					Else
+					{  
+						if( ($isFile_Real -and $isFile) -or ( (-not $isFile_Real) -and (-not $isFile)) )
+						{
+							Write-Verbose ("New-LongItem:`tCreating Symbolic Link ['{0}'] for ['{1}']" -f $FilePath,$Value)
+							$FileObject::CreateSymbolicLink($FilePath, $value, $linktarget)   						
+						}
+						Else
+						{
+							Write-Warning ("New-LongItem: Type(Folder\File) Mismatch between The SymbolicLink '{0}' & Target '{1}'." -f $FilePath,$Value)
+						}
+						
+     
+					}
+                     
+				}# if file and symboliclink
+				Elseif( ($ItemType -eq 'HardLink') -and  $isFile )
+				{
+					$FilePath = $pItem
+					
+                    
+					if (-not ($DirObject::Exists($Parent)) )
+					{
+						$DirObject::CreateDirectory($Parent)
+					}     
+                               
+					if($FileObject::Exists($FilePath))
+					{
+
+						Write-Warning ("New-LongItem: The HardLink '{0}' already exists." -f $FilePath)
+						
+					}# file exists
+					Else
+					{  
+						try
+						{
+							
+							if( ($isFile_Real -and $isFile) -or ( (-not $isFile_Real) -and (-not $isFile)) )
+							{
+								Write-Verbose ("New-LongItem:`tCreating Hard Link ['{0}'] for file ['{1}']" -f $FilePath,$Value)
+								$FileObject::CreateHardlink($FilePath, $Value)  						
+							}
+							Else
+							{
+								Write-Warning ("New-LongItem: Type(Folder\File) Mismatch between The Hardlink '{0}' & Target '{1}'.`nThe hardlink and Target must both be files" -f $FilePath,$Value)
+							}
+						
+													
+ 
+						
+						}
+						catch
+						{
+							Throw $_.exception.innerexception
+						}
+						
+					}
+                     
+				}# if file and Hardlink	
+				Elseif( ($ItemType -eq 'HardLink') -and  (-not $isFile) )	
+				{
+					$FilePath = $pItem
+					Write-Warning ("New-LongItem: The Hardlink to be created cannot be a folder '{0}'" -f $FilePath) 
+				}				 
                  
-            }#pscmdlet is Name
+			}#pscmdlet is Name
         
         
-        }#foreach pitem
+		}#foreach pitem
                         
 
-    }#Process
-    End
-    {
-    
-    }
+	}#Process
+	End
+	{
+		If ($privilegeEnabler) 
+		{
+			$privilegeEnabler.Dispose() 
+		}    
+	}
 
 }#end function 
+
 
 
 # .ExternalHelp PSAlphafs.psm1-help.xml
