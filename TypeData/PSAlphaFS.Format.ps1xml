@@ -1,23 +1,29 @@
 <Configuration>
-    <SelectionSets>
-        <SelectionSet>
-            <Name>AlphaFSFileSystemTypes</Name>
-            <Types>
-                <TypeName>Alphaleonis.Win32.Filesystem.FileInfo</TypeName>
-                <TypeName>Alphaleonis.Win32.Filesystem.FileSystemInfo</TypeName>				
-            </Types>
-        </SelectionSet>
-    </SelectionSets>
+  <SelectionSets>
+    <SelectionSet>
+      <Name>AlphaFSFileSystemTypes</Name>
+      <Types>
+        <TypeName>Alphaleonis.Win32.Filesystem.FileInfo</TypeName>
+        <TypeName>Alphaleonis.Win32.Filesystem.FileSystemInfo</TypeName>
+      </Types>
+    </SelectionSet>
+    <SelectionSet>
+      <Name>AlphaFSFileSystemDriveTypes</Name>
+      <Types>
+        <TypeName>Alphaleonis.Win32.Filesystem.DriveInfo</TypeName>
+      </Types>
+    </SelectionSet>
+  </SelectionSets>
   <ViewDefinitions>
     <View>
       <Name>children</Name>
       <ViewSelectedBy>
         <SelectionSetName>AlphaFSFileSystemTypes</SelectionSetName>
       </ViewSelectedBy>
-        <GroupBy>
-            <PropertyName>Directory</PropertyName>
-            <Label>Directory</Label>
-        </GroupBy>      
+      <GroupBy>
+        <PropertyName>Directory</PropertyName>
+        <Label>Directory</Label>
+      </GroupBy>
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
@@ -42,14 +48,10 @@
             <Wrap/>
             <TableColumnItems>
               <TableColumnItem>
-        				<ScriptBlock>
-        					if ( ($_.Attributes  -split ',').trim().contains('Directory') ){'Directory'}Else{'File'}
-        				</ScriptBlock>
+                <ScriptBlock>        					if ( ($_.Attributes  -split ',').trim().contains('Directory') ){'Directory'}Else{'File'}        				</ScriptBlock>
               </TableColumnItem>
               <TableColumnItem>
-                  <ScriptBlock>
-                      [String]::Format("{0,10}  {1,8}", $_.LastWriteTime.ToString("d"), $_.LastWriteTime.ToString("t"))
-                  </ScriptBlock>
+                <ScriptBlock>                      [String]::Format("{0,10}  {1,8}", $_.LastWriteTime.ToString("d"), $_.LastWriteTime.ToString("t"))                  </ScriptBlock>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Length</PropertyName>
@@ -61,6 +63,91 @@
           </TableRowEntry>
         </TableRowEntries>
       </TableControl>
-    </View>   
+    </View>
+    <View>
+      <Name>DiskSpaceInfo</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>AlphaFSFileSystemDriveTypes</SelectionSetName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+                  <TableColumnHeader>
+                      <Label>DriveLetter</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>VolumeLabel</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>FileSystem</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>DriveType</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>FreePercent</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>UsedPercent</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>Free</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>Used</Label>
+                  </TableColumnHeader>
+                  <TableColumnHeader>
+                      <Label>Size</Label>
+                  </TableColumnHeader>                  
+        </TableHeaders>
+        <TableRowEntries>
+                  <TableRowEntry>
+                      <TableColumnItems>
+                          <TableColumnItem>
+                              <PropertyName>Name</PropertyName>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <PropertyName>VolumeLabel</PropertyName>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <PropertyName>DriveFormat</PropertyName>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <PropertyName>DriveType</PropertyName>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <Alignment>Right</Alignment>
+                              <ScriptBlock>
+                                  return ($_.DiskSpaceInfo.AvailableFreeSpacePercent)  
+                              </ScriptBlock>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <Alignment>Right</Alignment>
+                              <ScriptBlock>
+                                  return ($_.DiskSpaceInfo.UsedSpacePercent)  
+                              </ScriptBlock>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <Alignment>Right</Alignment>
+                              <ScriptBlock>
+                                  return ($_.DiskSpaceInfo.AvailableFreeSpaceUnitSize)  
+                              </ScriptBlock>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <Alignment>Right</Alignment>
+                              <ScriptBlock>
+                                  return ($_.DiskSpaceInfo.UsedSpaceUnitSize)  
+                              </ScriptBlock>
+                          </TableColumnItem>
+                          <TableColumnItem>
+                              <Alignment>Right</Alignment>
+                              <ScriptBlock>
+                                  return ($_.DiskSpaceInfo.TotalSizeUnitSize)  
+                              </ScriptBlock>
+                          </TableColumnItem>
+                      </TableColumnItems>
+                  </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>    
   </ViewDefinitions>
 </Configuration>
