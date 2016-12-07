@@ -1271,7 +1271,7 @@ function DisMount-LongItem
 }#End Function
 
 
-function Get-MappedDrives
+function Get-LongMappedDrives
 {
 
 	[CmdletBinding()]
@@ -1309,7 +1309,7 @@ function Get-MappedDrives
 	}#end    
 }#End Function
 
-function Get-FreeDriveLetter
+function Get-LongFreeDriveLetter
 {
 
 	[CmdletBinding(DefaultParameterSetName = 'First')]
