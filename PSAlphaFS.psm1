@@ -304,7 +304,7 @@ function Copy-LongItem
 
         # An attempt to copy an encrypted file will succeed even if the destination copy cannot be encrypted.     
         [Switch]
-        $AllowDecryptedDestination,                                 
+        $AllowDecryptedDestination                              
     )
 
     Begin
