@@ -1157,10 +1157,6 @@ function Mount-LongItem
 			{
 				$NetWorkCreds.Domain = $Domain
 			}
-			elseif($env:USERDOMAIN)
-			{
-				$NetWorkCreds.Domain = $env:USERDOMAIN
-			}
 
 			#map drive
 			try
