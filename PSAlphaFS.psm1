@@ -1411,14 +1411,6 @@ function Get-LongDiskSpace
 	}#end    
 }#End Function
 
-Update-TypeData -MemberType ScriptProperty -MemberName IsCompressed -Value {$this.EntryInfo.IsCompressed} -TypeName Alphaleonis.Win32.Filesystem.FileInfo
-Update-TypeData -MemberType ScriptProperty -MemberName IsHidden -Value {$this.EntryInfo.IsHidden} -TypeName Alphaleonis.Win32.Filesystem.FileInfo
-Update-TypeData -MemberType ScriptProperty -MemberName IsEncrypted -Value {$this.EntryInfo.IsEncrypted} -TypeName Alphaleonis.Win32.Filesystem.FileInfo
-Update-TypeData -MemberType ScriptProperty -MemberName IsMountPoint -Value {$this.EntryInfo.IsMountPoint} -TypeName Alphaleonis.Win32.Filesystem.FileInfo
-Update-TypeData -MemberType ScriptProperty -MemberName IsOffline -Value {$this.EntryInfo.IsOffline} -TypeName Alphaleonis.Win32.Filesystem.FileInfo
-Update-TypeData -MemberType ScriptProperty -MemberName IsReadOnly -Value {$this.EntryInfo.IsReadOnly} -TypeName Alphaleonis.Win32.Filesystem.FileInfo
-
-
 
 
 Set-Alias -Name ldir -Value Get-LongChildItem

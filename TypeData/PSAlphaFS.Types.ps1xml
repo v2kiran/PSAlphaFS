@@ -6,21 +6,103 @@
 		  <ScriptProperty>
 			<Name>Mode</Name>
 			<GetScriptBlock>
-			  if ( ($this.Attributes  -split ',').trim().contains('Directory') ){'Directory'}Else{'File'}
+                  if ( $this.EntryInfo.IsDirectory )
+                  {
+                      if ( $this.EntryInfo.IsSymbolicLink )
+                      {
+                          return 'SymLink'
+                      }
+                      Else
+                      {
+                          return 'Directory'
+                      }
+                  }
+                  Else
+                  {
+                      if ( $this.EntryInfo.IsSymbolicLink )
+                      {
+                          return 'SymLink'
+                      }
+                      Else
+                      {
+                          return 'File'
+                      }
+                  }
 			</GetScriptBlock>
 		  </ScriptProperty>
-		  <ScriptProperty>
-			<Name>PathLength</Name>
-			<GetScriptBlock>
-			  if ( ($this.Attributes  -split ',').trim().contains('Directory') ){''}Else{$this.FullName.Length}
-			</GetScriptBlock>
-		  </ScriptProperty>		  
+
 		  <ScriptProperty>
 			<Name>BaseName</Name>
 			<GetScriptBlock>
-			  if ($this.Extension.Length -gt 0){$this.Name.Remove($this.Name.Length - $this.Extension.Length)}else{$this.Name}
+					[Alphaleonis.Win32.Filesystem.Path]::GetFileNameWithoutExtension($this.Name)
 			</GetScriptBlock>
 		  </ScriptProperty>
+
+		  <ScriptProperty>
+			<Name>PathLength</Name>
+			<GetScriptBlock>
+					if ($this.EntryInfo.IsDirectory){''}Else{$this.FullName.Length}
+			</GetScriptBlock>
+		  </ScriptProperty>
+
+		  <ScriptProperty>
+			<Name>IsLongPath</Name>
+			<GetScriptBlock>
+					[Alphaleonis.Win32.Filesystem.Path]::IsLongPath($this.EntryInfo.FullPath)
+			</GetScriptBlock>
+		  </ScriptProperty>
+
+		  <ScriptProperty>
+			<Name>IsSymbolicLink</Name>
+			<GetScriptBlock>
+					$this.EntryInfo.IsSymbolicLink
+			</GetScriptBlock>
+		  </ScriptProperty>
+
+		  <ScriptProperty>
+			<Name>IsDirectory</Name>
+			<GetScriptBlock>
+					$this.EntryInfo.IsDirectory
+			</GetScriptBlock>
+		  </ScriptProperty>
+
+		  <ScriptProperty>
+			<Name>IsCompressed</Name>
+			<GetScriptBlock>
+					$this.EntryInfo.IsCompressed
+			</GetScriptBlock>
+		  </ScriptProperty>
+
+		  <ScriptProperty>
+			<Name>IsHidden</Name>
+			<GetScriptBlock>
+					$this.EntryInfo.IsHidden
+			</GetScriptBlock>
+		  </ScriptProperty>
+
+		  <ScriptProperty>
+			<Name>IsEncrypted</Name>
+			<GetScriptBlock>
+					$this.EntryInfo.IsEncrypted
+			</GetScriptBlock>
+		  </ScriptProperty>
+
+
+		  <ScriptProperty>
+			<Name>IsMountPoint</Name>
+			<GetScriptBlock>
+					$this.EntryInfo.IsMountPoint
+			</GetScriptBlock>
+		  </ScriptProperty>		
+
+		  <ScriptProperty>
+			<Name>IsOffline</Name>
+			<GetScriptBlock>
+					$this.EntryInfo.IsOffline
+			</GetScriptBlock>
+		  </ScriptProperty>		
+
+						
 		  <MemberSet>
 			<Name>PSStandardMembers</Name>
 			<Members>
@@ -37,4 +119,70 @@
 		  </MemberSet>
 		</Members>
   </Type>
+  <Type>
+    <Name>Alphaleonis.Win32.Filesystem.DriveInfo</Name>
+		<Members>
+			<AliasProperty>
+					<Name>DriveLetter</Name>
+					<ReferencedMemberName>
+							Name
+					</ReferencedMemberName>
+			</AliasProperty>
+			<AliasProperty>
+					<Name>FileSystem</Name>
+					<ReferencedMemberName>
+							DriveFormat
+					</ReferencedMemberName>
+			</AliasProperty>		 
+		  <ScriptProperty>
+			<Name>FreePercent</Name>
+			<GetScriptBlock>
+						return ($this.DiskSpaceInfo.AvailableFreeSpacePercent) 
+			</GetScriptBlock>
+		  </ScriptProperty>
+		  <ScriptProperty>
+			<Name>UsedPercent</Name>
+			<GetScriptBlock>
+						return ($this.DiskSpaceInfo.UsedSpacePercent)  
+			</GetScriptBlock>
+		  </ScriptProperty>
+		  <ScriptProperty>
+			<Name>Free</Name>
+			<GetScriptBlock>
+						return ($this.DiskSpaceInfo.AvailableFreeSpaceUnitSize)  
+			</GetScriptBlock>
+		  </ScriptProperty>
+			<ScriptProperty>
+			<Name>Used</Name>
+			<GetScriptBlock>
+						return ($this.DiskSpaceInfo.UsedSpaceUnitSize)  
+			</GetScriptBlock>
+		  </ScriptProperty>
+		  <ScriptProperty>
+			<Name>Size</Name>
+			<GetScriptBlock>
+						return ($this.DiskSpaceInfo.TotalSizeUnitSize)  
+			</GetScriptBlock>
+		  </ScriptProperty>
+		  <MemberSet>
+			<Name>Driveinfolistview</Name>
+			<Members>
+			  <PropertySet>
+				<Name>DefaultDisplayPropertySet</Name>
+				<ReferencedProperties>
+				  <Name>DriveLetter</Name>					
+				  <Name>VolumeLabel</Name>
+				  <Name>FileSystem</Name>					
+				  <Name>DriveType</Name>
+				  <Name>FreePercent</Name>					
+				  <Name>UsedPercent</Name>
+				  <Name>Free</Name>					
+				  <Name>Used</Name>
+				  <Name>Size</Name>																									
+				</ReferencedProperties>
+			  </PropertySet>
+			</Members>
+		  </MemberSet>
+		</Members>
+  </Type>	
 </Types>

@@ -51,7 +51,14 @@
                 <ScriptBlock>   
                   if ( $_.EntryInfo.IsDirectory )
                   {
-                      return 'Directory'
+                      if ( $_.EntryInfo.IsSymbolicLink )
+                      {
+                          return 'SymLink'
+                      }
+                      Else
+                      {
+                          return 'Directory'
+                      }
                   }
                   Else
                   {
@@ -64,8 +71,7 @@
                           return 'File'
                       }
                   }
-       				
-                        
+       				                        
                         </ScriptBlock>
               </TableColumnItem>
               <TableColumnItem>
