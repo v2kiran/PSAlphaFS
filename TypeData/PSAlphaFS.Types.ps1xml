@@ -8,6 +8,14 @@
 				<GetScriptBlock>                  if ( $this.EntryInfo.IsDirectory )                  {                      if ( $this.EntryInfo.IsSymbolicLink )                      {                          return 'SymLink'                      }                      Else                      {                          return 'Directory'                      }                  }                  Else                  {                      if ( $this.EntryInfo.IsSymbolicLink )                      {                          return 'SymLink'                      }                      Else                      {                          return 'File'                      }                  }			</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
+				<Name>PSIsContainer</Name>
+				<GetScriptBlock>                  $this.EntryInfo.IsDirectory 	</GetScriptBlock>
+			</ScriptProperty>	
+			<ScriptProperty>
+				<Name>LinkType</Name>
+				<GetScriptBlock>                  $this.EntryInfo.ReparsePointTag 	</GetScriptBlock>
+			</ScriptProperty>						
+			<ScriptProperty>
 				<Name>BaseName</Name>
 				<GetScriptBlock>					[Alphaleonis.Win32.Filesystem.Path]::GetFileNameWithoutExtension($this.Name)			</GetScriptBlock>
 			</ScriptProperty>
