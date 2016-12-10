@@ -48,10 +48,10 @@ Function GetDotNetVer {
   }#end function
   
 
-$installed_dotnetversion = Get-DotNetVer | sort -Descending | Select-Object -First 1
+$installed_dotnetversion = GetDotNetVer | sort -Descending | Select-Object -First 1
 $libpath_parent = join-path (Split-Path $PSScriptRoot -Parent) -ChildPath lib
 
-switch(installed_dotnetversion)
+switch($installed_dotnetversion)
 {
     '3.5'    {$libpath = Join-Path $libpath_parent -ChildPath 'net35\AlphaFS.dll';break}
     '4.0'    {$libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll';break}
@@ -63,6 +63,7 @@ switch(installed_dotnetversion)
     default  {$libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll'}
 }
 
+Write-Verbose "Highest installed version of dot net:`t$installed_dotnetversion"
 # Load the AlphaFS assembly
 Add-Type -Path $libpath
 
