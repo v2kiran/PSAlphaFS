@@ -45,7 +45,11 @@ function Get-LongChildItem
         
         # Get Only File or Folder Names
         [Switch] 
-        $Name
+        $Name,
+
+        # Dont show symbolic links 
+        [Switch] 
+        $SkipSymbolicLink        
                                     
    
     )    
@@ -61,7 +65,11 @@ function Get-LongChildItem
         if($PSBoundParameters.Containskey('Recurse') )
         {
              $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Recursive 
-        }     
+        } 
+        if($PSBoundParameters.Containskey('SkipSymbolicLink') )
+        {
+             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::SkipReparsePoints 
+        }             
         if($PSBoundParameters.Containskey('Directory') -and (-not($PSBoundParameters.Containskey('File'))))
         {
             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Folders 
@@ -79,7 +87,7 @@ function Get-LongChildItem
              $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders 
         }  
 
- 
+        $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]$dirEnumOptions
         $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)       
         
     }

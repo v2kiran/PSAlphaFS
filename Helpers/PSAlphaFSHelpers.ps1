@@ -1,4 +1,6 @@
 Function GetDotNetVer {
+    #https://gallery.technet.microsoft.com/scriptcenter/Detect-NET-Framework-120ec923
+    #modified to work with this module
     $dotNetRegistry  = 'SOFTWARE\Microsoft\NET Framework Setup\NDP'
     $dotNet4Registry = 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full'
     $dotNet4Builds = 
