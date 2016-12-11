@@ -101,10 +101,11 @@ function Get-LongChildItem
     
             if($Attributes -contains 'Directory')
             {
-                foreach ($N in @($DirObject::EnumerateFileSystemEntries($pItem,$Filter,$dirEnumOptions)))
-                {
-                    $filename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($N)
-                    
+                $DirObject::EnumerateFileSystemEntries($pItem,$Filter,$dirEnumOptions) | 
+		        ForEach-Object {
+
+                    $filename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($_)
+                  
                     if ($include -and (-not(CompareExtension -Extension $include -Filename $filename)))
                     {
                         continue
@@ -115,11 +116,13 @@ function Get-LongChildItem
                     }      
                     if($name)
                     {
-                        $N.Replace($pitem,'') -replace '^\\'
+                        $_.Replace($pitem,'') -replace '^\\'
                     }
                     Else
                     {
-                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $N
+                        
+                        
+                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $_
                     }
             }
             
