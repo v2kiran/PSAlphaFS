@@ -55,6 +55,15 @@
 				<Name>IsOffline</Name>
 				<GetScriptBlock>					$this.EntryInfo.IsOffline			</GetScriptBlock>
 			</ScriptProperty>
+			<ScriptProperty>
+				<Name>FileHash</Name>
+				<GetScriptBlock>					
+					if(-not ($this.EntryInfo.IsDirectory))
+					{
+						return ($this.GetHash([Alphaleonis.Win32.Security.HashType]::MD5))
+					}		
+				</GetScriptBlock>
+			</ScriptProperty>			
 			<MemberSet>
 				<Name>PSStandardMembers</Name>
 				<Members>

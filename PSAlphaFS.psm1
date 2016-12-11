@@ -57,6 +57,7 @@ function Get-LongChildItem
     Begin
     {
         $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
+        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
 
         $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::ContinueOnException 
         $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::BasicSearch
@@ -103,16 +104,14 @@ function Get-LongChildItem
             {
                 $DirObject::EnumerateFileSystemEntries($pItem,$Filter,$dirEnumOptions) | 
 		        ForEach-Object {
-
-                    $filename = [Alphaleonis.Win32.Filesystem.Path]::GetFileName($_)
-                  
-                    if ($include -and (-not(CompareExtension -Extension $include -Filename $filename)))
+               
+                    if ($include -and (-not(CompareExtension -Extension $include -Filename $PathFSObject::GetFileName($_))))
                     {
-                        continue
+                        return
                     }
-                    if ($exclude -and (CompareExtension -Extension $exclude -Filename $filename))
+                    if ($exclude -and (CompareExtension -Extension $exclude -Filename $PathFSObject::GetFileName($_)))
                     {
-                        continue
+                        return
                     }      
                     if($name)
                     {
@@ -120,11 +119,11 @@ function Get-LongChildItem
                     }
                     Else
                     {
-                        
-                        
+                                              
                         New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $_
                     }
-            }
+
+                }#foreach filesystementry
             
             }#If path is a folder
             Else
