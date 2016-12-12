@@ -1,8 +1,12 @@
 
 #Define Alphafs Class Shortcuts
 $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
+$FileObject = [Alphaleonis.Win32.Filesystem.File]
+$FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
 $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
 $dirEnumOptionsFSObject = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]
+$copyFsObject = [Alphaleonis.Win32.Filesystem.CopyOptions]
+$linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
 
 
 # .ExternalHelp PSAlphafs.psm1-help.xml
@@ -180,8 +184,7 @@ function Get-LongItem
     )    
 
     Begin
-    {
-        $DirObject = [Alphaleonis.Win32.Filesystem.Directory]    
+    {  
         $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)         
     }
     Process
@@ -236,8 +239,7 @@ function Rename-LongItem
 
     Begin
     {
-        $DirObject = [Alphaleonis.Win32.Filesystem.Directory] 
-        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+
     }
     Process
     {       
@@ -322,11 +324,6 @@ function Copy-LongItem
 
     Begin
     {
-        $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
-        $FileObject = [Alphaleonis.Win32.Filesystem.File]
-        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
-        $copyFsObject = [Alphaleonis.Win32.Filesystem.CopyOptions]
-
         $copyOptions = $copyFsObject::FailIfExists
         if($PSBoundParameters.Containskey('CopySymbolicLink') )
         {
@@ -345,12 +342,12 @@ function Copy-LongItem
     Process
     {       
         $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
-        $Attributes = ($PathObject.Attributes  -split ',').trim() 
         
         $basename = $PathFSObject::GetFileName($Path)
         $dBasename = $PathFSObject::GetFileName($Destination)
         $dParent =  $PathFSObject::GetDirectoryName($Destination)
         
+        $dBasenameObj = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $dBasename
         $isFile = if($PathFSObject::HasExtension($dBasename) ){$true}else {$false} 
         
         # Create the directory tree before the copy
@@ -381,61 +378,40 @@ function Copy-LongItem
 
                  
         if($Force){$Overwrite = $true}else{$Overwrite = $false }
-            
-        if($Attributes -contains 'Directory')
+        if($PathObject.EntryInfo.IsDirectory)
         {
-             
-            $Destination = 
-            try
-             {
-                 $DirObject::Copy($Path, $destination,$copyOptions)
-             }
-             catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException]
-             {
-                 if($Force)
-                 {
-                     Write-Verbose ("Copy-LongItem:`t Overwriting existing directory...Copying '{0}' to '{1}'" -f $Path,$Destination)
-                     $DirObject::Copy($Path, $Destination, $Overwrite)               
-                 }
-                Else
-                {
-                    Write-Warning ("Copy-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $Destination)                 
-                }                  
-            
-             }
-             Catch
-             {
-                 throw $_
-             }
+            $fsObject = $DirObject
+        }
+        else
+        {
+            $fsObject = $FileObject
+        }    
+
+        # Perform the copy     
+        try
+        {
+            $fsObject::Copy($Path, $destination,$copyOptions)
+        }
+        catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException]
+        {
+            if($Force)
+            {
+                Write-Verbose ("Copy-LongItem:`t Overwriting existing item...Copying '{0}' to '{1}'" -f $Path,$Destination)
+                $fsObject::Copy($Path, $Destination, $Overwrite)               
+            }
+            Else
+            {
+                Write-Warning ("Copy-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $Destination)                 
+            }                  
     
-        }#Directory
-        Else
-        {           
-             try
-             {
-                 $FileObject::Copy($Path, $destination, $copyOptions)
-             }
-             catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException]
-             {
-                 if($Force)
-                 {
-                     Write-Verbose ("Copy-LongItem:`t Overwriting existing File...Copying '{0}' to '{1}'" -f $Path,$Destination)
-                     $FileObject::Copy($Path, $Destination, $Overwrite)               
-                 }
-                Else
-                {
-                    Write-Warning ("Copy-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $Destination)                 
-                }                  
-            
-             }
-             Catch
-             {
-                 throw $_
-             }         
-         
+        }
+        Catch
+        {
+            throw $_
+        }
+    
         
-        }#file         
-            
+        
 
     }#Process
     End
@@ -474,22 +450,21 @@ function Remove-LongItem
 
     Begin
     {
-        $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
-        $FileObject = [Alphaleonis.Win32.Filesystem.File]
-        $DirOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders
+
+        $DirOptions = $dirEnumOptionsFSObject::FilesAndFolders
         $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)       
         
     }
     Process
     {       
         $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
-        $Attributes = ($PathObject.Attributes  -split ',').trim() 
+
         
   
         if($Recurse){$RemoveAll = $true;$Force = $true}else{$RemoveAll = $false }
         if($Force){$IgnoreReadOnly = $true}else{$IgnoreReadOnly = $false }
             
-        if($Attributes -contains 'Directory')
+        if($PathObject.EntryInfo.IsDirectory)
         {
             if($Recurse)
             {
@@ -579,19 +554,10 @@ function New-LongItem
 
 	Begin
 	{
-		$DirObject = [Alphaleonis.Win32.Filesystem.Directory]
-		$FileObject = [Alphaleonis.Win32.Filesystem.File]
-		$FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
-		$PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
-		$linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
-
-		
 		$privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler -ArgumentList ([Alphaleonis.Win32.Security.Privilege]::CreateSymbolicLink, $null)  
-
 	}
 	Process
 	{       
-
         
 		foreach ($pItem in $Path)
 		{
@@ -1008,9 +974,6 @@ function Move-LongItem
     Begin
     {
         $ReplaceExisting = [Alphaleonis.Win32.Filesystem.MoveOptions]::ReplaceExisting
-        $FileObject = [Alphaleonis.Win32.Filesystem.File]
-        $DirectoryObject = [Alphaleonis.Win32.Filesystem.Directory]
-        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
     }
     Process
     {       
@@ -1035,7 +998,7 @@ function Move-LongItem
             Else
             {
                 $Destination_isDirectory = $true
-                $NewPath = Join-Path -Path $Destination -ChildPath $basename 
+                $NewPath = $PathFSObject::Combine($Destination, $basename)
             }            
         }#basename is file
         Else
@@ -1053,7 +1016,7 @@ function Move-LongItem
                 
                 $Destination_isDirectory = $true
 
-                if($DirectoryObject::Exists($Destination ))
+                if($DirObject::Exists($Destination ))
                 {
                     $NewPath = $PathFSObject::Combine($destination, $basename) 
                 }
@@ -1120,7 +1083,7 @@ function Move-LongItem
 
 }#end function 
 
-function Mount-LongItem
+function Mount-LongShare
 {
 
 	[CmdletBinding(DefaultParameterSetName = 'Simple')]
@@ -1174,7 +1137,7 @@ function Mount-LongItem
 			#map drive
 			try
 			{
-				Write-Verbose ("Mount-LongItem:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}'] with Credentials '[{2}']" -f $NetWorkShare,$DriveLetter, $Credential.UserName)
+				Write-Verbose ("Mount-LongShare:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}'] with Credentials '[{2}']" -f $NetWorkShare,$DriveLetter, $Credential.UserName)
 				$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare, $Credential, $false, $true, $true)
 			
 			}
@@ -1192,7 +1155,7 @@ function Mount-LongItem
 			#map drive
 			try
 			{
-				Write-Verbose ("Mount-LongItem:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}']" -f $NetWorkShare,$DriveLetter)
+				Write-Verbose ("Mount-LongShare:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}']" -f $NetWorkShare,$DriveLetter)
 				$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare)
 			
 			}
@@ -1213,7 +1176,7 @@ function Mount-LongItem
 }#End Function
 
 
-function DisMount-LongItem
+function DisMount-LongShare
 {
 
 	[CmdletBinding()]
@@ -1248,12 +1211,12 @@ function DisMount-LongItem
 			if($Force)
 			{
 				 
-				Write-Verbose ("DisMount-LongItem:`t Force Detected...Closing open network connections and Removing Mapped Drive ['{0}']" -f $DriveLetter)
+				Write-Verbose ("DisMount-LongShare:`t Force Detected...Closing open network connections and Removing Mapped Drive ['{0}']" -f $DriveLetter)
 				$RemoveDrive = [Alphaleonis.Win32.Network.Host]::DisconnectDrive($DriveLetter, $true, $true)
 			}
 			Else
 			{
-				Write-Verbose ("DisMount-LongItem:`t Removing Mapped Drive ['{0}']" -f $DriveLetter)   
+				Write-Verbose ("DisMount-LongShare:`t Removing Mapped Drive ['{0}']" -f $DriveLetter)   
 				$RemoveDrive = [Alphaleonis.Win32.Network.Host]::DisconnectDrive($DriveLetter, $false, $true)
 			}
 			
@@ -1280,7 +1243,7 @@ function DisMount-LongItem
 }#End Function
 
 
-function Get-LongMappedDrives
+function Get-LongMappedDrive
 {
 
 	[CmdletBinding()]
@@ -1421,7 +1384,7 @@ function Get-LongDiskSpace
 }#End Function
 
 
-
-Set-Alias -Name ldir -Value Get-LongChildItem
-Set-Alias -Name lgci -Value Get-LongChildItem
+Export-ModuleMember -Alias ldir,lgci -Function Get-LongChildItem
+#Set-Alias -Name ldir -Value Get-LongChildItem
+#Set-Alias -Name lgci -Value Get-LongChildItem
 
