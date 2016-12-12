@@ -1,6 +1,8 @@
 Function GetDotNetVer {
     #https://gallery.technet.microsoft.com/scriptcenter/Detect-NET-Framework-120ec923
     #modified to work with this module
+    [cmdletbinding()]
+    param()
     $dotNetRegistry  = 'SOFTWARE\Microsoft\NET Framework Setup\NDP'
     $dotNet4Registry = 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full'
     $dotNet4Builds = 
@@ -50,20 +52,29 @@ Function GetDotNetVer {
   }#end function
   
 
-$installed_dotnetversion = GetDotNetVer | sort -Descending | Select-Object -First 1
+$installed_dotnetversion = GetDotNetVer -ErrorAction SilentlyContinue  | sort -Descending | Select-Object -First 1
 $libpath_parent = join-path (Split-Path $PSScriptRoot -Parent) -ChildPath lib
 
-switch($installed_dotnetversion)
+if([string]::IsNullOrEmpty($installed_dotnetversion))
 {
-    '3.5'    {$libpath = Join-Path $libpath_parent -ChildPath 'net35\AlphaFS.dll';break}
-    '4.0'    {$libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll';break}
-    '4.5.0'  {$libpath = Join-Path $libpath_parent -ChildPath 'net45\AlphaFS.dll';break}
-    '4.5.1'  {$libpath = Join-Path $libpath_parent -ChildPath 'net451\AlphaFS.dll';break}
-    '4.5.2'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
-    '4.6.1'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
-    '4.6.2'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
-    default  {$libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll'}
+    $libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll'
 }
+else 
+{
+    switch($installed_dotnetversion)
+    {
+        '3.5'    {$libpath = Join-Path $libpath_parent -ChildPath 'net35\AlphaFS.dll';break}
+        '4.0'    {$libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll';break}
+        '4.5.0'  {$libpath = Join-Path $libpath_parent -ChildPath 'net45\AlphaFS.dll';break}
+        '4.5.1'  {$libpath = Join-Path $libpath_parent -ChildPath 'net451\AlphaFS.dll';break}
+        '4.5.2'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
+        '4.6.1'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
+        '4.6.2'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
+        default  {$libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll'}
+    }
+    
+}# if installed_dotnetversion
+
 
 Write-Verbose "Highest installed version of dot net:`t$installed_dotnetversion"
 # Load the AlphaFS assembly

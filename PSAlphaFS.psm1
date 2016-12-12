@@ -1,4 +1,10 @@
 
+#Define Alphafs Class Shortcuts
+$DirObject = [Alphaleonis.Win32.Filesystem.Directory]
+$PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+$dirEnumOptionsFSObject = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]
+
+
 # .ExternalHelp PSAlphafs.psm1-help.xml
 function Get-LongChildItem
 {
@@ -56,36 +62,34 @@ function Get-LongChildItem
 
     Begin
     {
-        $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
-        $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
 
-        $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::ContinueOnException 
-        $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::BasicSearch
-        $dirEnumOptions =  $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::LargeCache 
+        $dirEnumOptions = $dirEnumOptionsFSObject::ContinueOnException 
+        $dirEnumOptions =  $dirEnumOptions -bor $dirEnumOptionsFSObject::BasicSearch
+        $dirEnumOptions =  $dirEnumOptions -bor $dirEnumOptionsFSObject::LargeCache 
 
         if($PSBoundParameters.Containskey('Recurse') )
         {
-             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Recursive 
+             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::Recursive 
         } 
         if($PSBoundParameters.Containskey('SkipSymbolicLink') )
         {
-             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::SkipReparsePoints 
+             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::SkipReparsePoints 
         }             
         if($PSBoundParameters.Containskey('Directory') -and (-not($PSBoundParameters.Containskey('File'))))
         {
-            $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Folders 
+            $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::Folders 
         }
         if($PSBoundParameters.Containskey('file') -and (-not($PSBoundParameters.Containskey('Directory'))))
         {
-            $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::Files 
+            $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::Files 
         }
         if(-not($PSBoundParameters.Containskey('Directory')) -and (-not($PSBoundParameters.ContainsKey('File')) ))
         {
-             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders 
+             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::FilesAndFolders 
         }        
         if($PSBoundParameters.Containskey('Directory') -and $PSBoundParameters.ContainsKey('File') )
         {
-             $dirEnumOptions = $dirEnumOptions -bor [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]::FilesAndFolders 
+             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::FilesAndFolders 
         }  
 
         $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]$dirEnumOptions
@@ -98,9 +102,8 @@ function Get-LongChildItem
         {
             
             $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $pItem
-            $Attributes = ($PathObject.Attributes  -split ',').trim() 
-    
-            if($Attributes -contains 'Directory')
+  
+            if($PathObject.EntryInfo.IsDirectory)
             {
                 $DirObject::EnumerateFileSystemEntries($pItem,$Filter,$dirEnumOptions) | 
 		        ForEach-Object {
@@ -337,7 +340,7 @@ function Copy-LongItem
         {
              $copyOptions = $copyOptions -bor $copyFsObject::AllowDecryptedDestination
         }                       
-        
+        $copyOptions = [Alphaleonis.Win32.Filesystem.CopyOptions]$copyOptions
     }
     Process
     {       
