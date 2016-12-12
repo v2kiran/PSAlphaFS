@@ -4,6 +4,7 @@ $DirObject = [Alphaleonis.Win32.Filesystem.Directory]
 $FileObject = [Alphaleonis.Win32.Filesystem.File]
 $FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
 $PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+$PathFSFormatObject = [Alphaleonis.Win32.Filesystem.PathFormat]
 $dirEnumOptionsFSObject = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]
 $copyFsObject = [Alphaleonis.Win32.Filesystem.CopyOptions]
 $linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
@@ -12,7 +13,7 @@ $linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
 # .ExternalHelp PSAlphafs.psm1-help.xml
 function Get-LongChildItem
 {
-
+    [Alias('ldir','lgci')]
     [CmdletBinding(DefaultParameterSetName='All')]
     Param
     (
@@ -469,7 +470,7 @@ function Remove-LongItem
             if($Recurse)
             {
                 Write-Verbose ("Remove-LongItem:`t Deleting directory '{0}' recursively" -f $Path)
-                $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)            
+                $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly, $PathFSFormatObject::FullPath)            
             }
             Else
             {
@@ -480,7 +481,7 @@ function Remove-LongItem
                 Else
                 {
                     Write-Verbose ("Remove-LongItem:`t Deleting empty directory '{0}'" -f $Path)
-                    $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)                
+                    $DirObject::Delete($Path, $RemoveAll, $IgnoreReadOnly, $PathFSFormatObject::FullPath)                
                 }
             
             
@@ -492,7 +493,7 @@ function Remove-LongItem
              try
              {
                  Write-Verbose ("Remove-LongItem:`t Deleting file '{0}'..." -f $Path)
-                 $FileObject::Delete($Path, $IgnoreReadOnly, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)  
+                 $FileObject::Delete($Path, $IgnoreReadOnly, $PathFSFormatObject::FullPath)  
              }
              catch [Alphaleonis.Win32.Filesystem.FileReadOnlyException]
              {
@@ -1384,7 +1385,84 @@ function Get-LongDiskSpace
 }#End Function
 
 
-Export-ModuleMember -Alias ldir,lgci -Function Get-LongChildItem
+function Get-LongDirectorySize
+{
+
+    [CmdletBinding()]
+    Param
+    (
+        # Specify the Path to a Folder
+        [ValidateScript({ 
+                    if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) ) { $true}
+                    Else{Write-warning ("Get-LongDirectorySize:`tDirectory '{0}' does not exist`n`n" -f $_) }
+        })]        
+        [Parameter(Mandatory=$true,
+                ValueFromPipelineByPropertyName=$true,
+                ValueFromPipeline=$true,
+        Position=0)]
+        [String]
+        $Path,
+
+        # Enumerate Subdirectories
+        [Switch] 
+        $Recurse,
+
+        # Enumerate Subdirectories
+        [Switch] 
+        $ContinueonError                
+          
+    )    
+
+    Begin
+    {  
+        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)
+        $dirEnumOptions = $dirEnumOptionsFSObject::SkipReparsePoints 
+        
+        if($PSBoundParameters.Containskey('Recurse') )
+        {
+             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::Recursive 
+        } 
+        if($PSBoundParameters.Containskey('ContinueonError') )
+        {
+             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::ContinueOnException 
+        }         
+        $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]$dirEnumOptions 
+    }
+    Process
+    {
+
+            $ResultHash = $DirObject::GetProperties( $Path, $dirEnumOptions, $PathFSFormatObject::FullPath)
+            $size = $ResultHash.Size
+            
+            if($size)
+            {
+                $postfixes = @( "Bytes", "KB", "MB", "GB", "TB", "PB" )
+                for ($i=0; $size -ge 1024 -and $i -lt $postfixes.Length - 1; $i++) 
+                { 
+                    $size = $size / 1024
+                }
+                $rounded_size = [System.Math]::Round($size,2)
+                $ResultHash.Add("Sizein$($postfixes[$i])", $rounded_size) | Out-Null
+                Write-Verbose ("The size of the folder '{0}' is '{1} {2}'" -f $Path,$rounded_size, $postfixes[$i])
+                
+            }
+            Write-Output $ResultHash
+
+
+        
+        
+    }#Process
+    End
+    {
+        If ($privilegeEnabler) 
+        {
+            $privilegeEnabler.Dispose()
+        }
+    }#end    
+}#End Function
+
+#Export-ModuleMember *
+#Export-ModuleMember -Alias ldir,lgci -Function Get-LongChildItem
 #Set-Alias -Name ldir -Value Get-LongChildItem
 #Set-Alias -Name lgci -Value Get-LongChildItem
 
