@@ -111,6 +111,15 @@
 				<Name>Size</Name>
 				<GetScriptBlock>						return ($this.DiskSpaceInfo.TotalSizeUnitSize)  			</GetScriptBlock>
 			</ScriptProperty>
+			<ScriptProperty>
+				<Name>UncPath</Name>
+				<GetScriptBlock>						
+				if($this.DriveType -eq 'Network')
+				{
+					return ([Alphaleonis.Win32.Filesystem.Path]::LocalToUnc($this.Name))
+				}  			
+				</GetScriptBlock>
+			</ScriptProperty>			
 			<MemberSet>
 				<Name>Driveinfolistview</Name>
 				<Members>
@@ -126,6 +135,7 @@
 							<Name>Free</Name>
 							<Name>Used</Name>
 							<Name>Size</Name>
+							<Name>UncPath</Name>							
 						</ReferencedProperties>
 					</PropertySet>
 				</Members>

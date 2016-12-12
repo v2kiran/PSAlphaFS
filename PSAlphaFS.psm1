@@ -397,8 +397,12 @@ function Copy-LongItem
         {
             if($Force)
             {
+                # need to delete destination because the copy method dosent contain an overload that includes
+                # both the overwrite and copyoptions parameters
+                $DirObject::Delete($destination, $true, $true, $PathFSFormatObject::FullPath) 
+
                 Write-Verbose ("Copy-LongItem:`t Overwriting existing item...Copying '{0}' to '{1}'" -f $Path,$Destination)
-                $fsObject::Copy($Path, $Destination, $Overwrite)               
+                $fsObject::Copy($Path, $Destination, $copyOptions)               
             }
             Else
             {
@@ -544,7 +548,7 @@ function New-LongItem
 		[String]
 		$Value,
 		
-		[Alias('LinkName','Link')]		
+		[Alias('LinkName','Link','SymLink','ShortCut')]		
 		[Parameter(Mandatory=$true,ParameterSetName = 'Name')]
 		[String]
 		$Name,
@@ -1346,7 +1350,7 @@ function Get-LongFreeDriveLetter
 	}#end    
 }#End Function
 
-function Get-LongDiskSpace
+function Get-LongDiskDrive
 {
 
 	[CmdletBinding()]
@@ -1417,7 +1421,7 @@ function Get-LongDirectorySize
     {  
         $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::Backup, $null)
         $dirEnumOptions = $dirEnumOptionsFSObject::SkipReparsePoints 
-        
+
         if($PSBoundParameters.Containskey('Recurse') )
         {
              $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::Recursive 
