@@ -339,6 +339,7 @@ function Copy-LongItem
              $copyOptions = $copyOptions -bor $copyFsObject::AllowDecryptedDestination
         }                       
         $copyOptions = [Alphaleonis.Win32.Filesystem.CopyOptions]$copyOptions
+        $privilegeEnabler = New-Object Alphaleonis.Win32.Security.PrivilegeEnabler([Alphaleonis.Win32.Security.Privilege]::CreateSymbolicLink, $null)
     }
     Process
     {       
@@ -421,7 +422,10 @@ function Copy-LongItem
     }#Process
     End
     {
-    
+        If ($privilegeEnabler) 
+        {
+            $privilegeEnabler.Dispose() 
+        }    
     }
 
 }#end function 
