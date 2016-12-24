@@ -634,8 +634,18 @@ function New-LongItem
 					}
 				}#pscmdlet is Name	
 
-		
-				newlongitemhelper -Filename $FilePath -itemtype $ItemType -value $Value -Encoding $Encoding
+				
+				 $params = 
+				@{
+					Filename = $FilePath
+					itemtype = $ItemType
+					value    = $Value
+					Encoding = $Encoding
+				}
+				if($Force) {$params.Add('Force',$Force)}
+				newlongitemhelper @params
+				
+
 			}#foreach pitem
 		}# if path
 		Else
@@ -652,7 +662,15 @@ function New-LongItem
 				}
 			}#pscmdlet is Name	
 
-			newlongitemhelper -Filename $FilePath -itemtype $ItemType -value $Value -Encoding $Encoding
+			$params = 
+			@{
+				Filename = $FilePath
+				itemtype = $ItemType
+				value    = $Value
+				Encoding = $Encoding
+			}
+			if($Force) {$params.Add('Force',$Force)}
+			newlongitemhelper @params
 		}# if path is not specified            
 
 	}#Process
@@ -1176,8 +1194,7 @@ function Get-LongDirectorySize
 	}#end    
 }#End Function
 
-#Export-ModuleMember *
-#Export-ModuleMember -Alias ldir,lgci -Function Get-LongChildItem
-#Set-Alias -Name ldir -Value Get-LongChildItem
-#Set-Alias -Name lgci -Value Get-LongChildItem
+
+Set-Alias -Name ldir -Value Get-LongChildItem
+
 

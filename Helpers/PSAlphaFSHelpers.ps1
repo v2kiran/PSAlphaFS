@@ -102,7 +102,8 @@ Function newlongitemhelper {
 		[string]$Filename,
 		[String]$itemtype,
 		$value,
-		[String]$Encoding
+		[String]$Encoding,
+		[Switch]$Force
 	)
 		$DirObject = [Alphaleonis.Win32.Filesystem.Directory]
 		$FileObject = [Alphaleonis.Win32.Filesystem.File]
@@ -111,6 +112,7 @@ Function newlongitemhelper {
 		$linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
 		$PathFSFormatObject = [Alphaleonis.Win32.Filesystem.PathFormat]
 		
+		$FilePath = $Filename
 		$Leaf = $PathFSObject::GetFileName($FilePath) 
 		$Parent  = $PathFSObject::GetDirectoryName($FilePath)
 		$isFile = if($PathFSObject::HasExtension($Leaf) ){$true}else {$false} 	
