@@ -5,7 +5,7 @@
 		<Members>
 			<ScriptProperty>
 				<Name>Mode</Name>
-				<GetScriptBlock>                  if ( $this.EntryInfo.IsDirectory )                  {                      if ( $this.EntryInfo.IsSymbolicLink )                      {                          return 'SymLink'                      }                      Else                      {                          return 'Directory'                      }                  }                  Else                  {                      if ( $this.EntryInfo.IsSymbolicLink )                      {                          return 'SymLink'                      }                      Else                      {                          return 'File'                      }                  }			</GetScriptBlock>
+				<GetScriptBlock>                  if ( $this.EntryInfo.IsDirectory ) {  if ( $this.EntryInfo.IsSymbolicLink ){  return 'SymbolicLink-d'  }   Else     {  return 'Directory' }  } Else  {   if ( $this.EntryInfo.IsSymbolicLink )   {  return 'SymbolicLink-f'                   }                      Else                      {                          return 'File'                      }                  }			</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>PSIsContainer</Name>
@@ -13,7 +13,7 @@
 			</ScriptProperty>	
 			<ScriptProperty>
 				<Name>LinkType</Name>
-				<GetScriptBlock>                  $this.EntryInfo.ReparsePointTag 	</GetScriptBlock>
+				<GetScriptBlock>       $s = $this.EntryInfo.ReparsePointTag   ; switch($s){'Symlink' {return 'SymbolicLink';break};default {return $s}} 	</GetScriptBlock>
 			</ScriptProperty>						
 			<ScriptProperty>
 				<Name>BaseName</Name>
@@ -21,11 +21,11 @@
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>PathLength</Name>
-				<GetScriptBlock>					if ($this.EntryInfo.IsDirectory){''}Else{$this.FullName.Length}			</GetScriptBlock>
+				<GetScriptBlock>					$this.FullName.Length			</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
-				<Name>IsLongPath</Name>
-				<GetScriptBlock>					[Alphaleonis.Win32.Filesystem.Path]::IsLongPath($this.EntryInfo.FullPath)			</GetScriptBlock>
+				<Name>IsPathLong</Name>
+				<GetScriptBlock>					if($this.FullName.Length -ge 260){return $true}else{return $false}			</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>IsSymbolicLink</Name>
@@ -63,7 +63,16 @@
 						return ($this.GetHash([Alphaleonis.Win32.Security.HashType]::MD5))
 					}		
 				</GetScriptBlock>
-			</ScriptProperty>			
+			</ScriptProperty>
+			<ScriptProperty>
+				<Name>Target</Name>
+				<GetScriptBlock>					
+					if($this.EntryInfo.IsSymbolicLink)
+					{
+						return (([Alphaleonis.Win32.Filesystem.File]::GetLinkTargetInfo($this.FullName, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)).PrintName)
+					}		
+				</GetScriptBlock>
+			</ScriptProperty>									
 			<MemberSet>
 				<Name>PSStandardMembers</Name>
 				<Members>

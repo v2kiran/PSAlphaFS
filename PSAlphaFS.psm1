@@ -106,7 +106,7 @@ function Get-LongChildItem
         foreach ($pItem in $Path)
         {
             
-            $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $pItem
+            $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $pItem, $PathFSFormatObject::FullPath
   
             if($PathObject.EntryInfo.IsDirectory)
             {
@@ -128,7 +128,7 @@ function Get-LongChildItem
                     Else
                     {
                                               
-                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $_
+                        New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $_, $PathFSFormatObject::FullPath
                     }
 
                 }#foreach filesystementry
@@ -192,7 +192,7 @@ function Get-LongItem
     {
         foreach ($PItem in $Path)
         {
-            New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $PItem
+            New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $PItem, $PathFSFormatObject::FullPath
         }
         
     }#Process
@@ -343,7 +343,7 @@ function Copy-LongItem
     }
     Process
     {       
-        $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
+        $PathObject = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path, $PathFSFormatObject::FullPath
         
         $basename = $PathFSObject::GetFileName($Path)
         $dBasename = $PathFSObject::GetFileName($Destination)
@@ -576,7 +576,7 @@ function New-LongItem
 			{
 				$Baseobj = $PathFSObject::GetFileName($pItem) 
 				$Parent  = $PathFSObject::GetDirectoryName($pItem)
-				$isFile = if($PathFSObject::HasExtension($Baseobj) ){$true}else {$false} 
+				#$isFile = if($PathFSObject::HasExtension($Baseobj) ){$true}else {$false} 
 				
 				$RealFileBaseobj = $PathFSObject::GetFileName($value) 
 				$RealFileParent  = $PathFSObject::GetDirectoryName($value)
