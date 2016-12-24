@@ -883,7 +883,7 @@ function Mount-LongShare
 			}
 			catch
 			{
-				throw $_.exception.innerexception
+				throw $_
 			}
 		}# Parameterset Credential
 		
@@ -897,7 +897,7 @@ function Mount-LongShare
 			}
 			catch
 			{
-				throw $_.exception.innerexception
+				throw $_
 			}
 		}# Parameterset Simple
         
@@ -961,7 +961,7 @@ function DisMount-LongShare
 			}
 			else
 			{
-				throw $_.Exception.InnerException
+				throw $_
 			}
 		}
 			
@@ -995,7 +995,7 @@ function Get-LongMappedDrive
 		}
 		catch
 		{
-			throw $_.Exception.InnerException
+			throw $_
 		}
 			
 		
@@ -1035,7 +1035,7 @@ function Get-LongFreeDriveLetter
 			}
 			catch
 			{
-				throw $_.exception.innerexception
+				throw $_
 			}
 		}# Parameterset First
 		
@@ -1049,7 +1049,7 @@ function Get-LongFreeDriveLetter
 			}
 			catch
 			{
-				throw $_.exception.innerexception
+				throw $_
 			}
 		}# Parameterset Last		
 			
@@ -1083,7 +1083,7 @@ function Get-LongDiskDrive
 		}
 		catch
 		{
-			throw $_.Exception.InnerException
+			throw $_
 		}
 			
 		
