@@ -53,7 +53,7 @@
                   {
                       if ( $_.EntryInfo.IsSymbolicLink )
                       {
-                          return 'SymbolicLink-d'
+                          return 'SymLink-d'
                       }
                       Else
                       {
@@ -64,7 +64,7 @@
                   {
                       if ( $_.EntryInfo.IsSymbolicLink )
                       {
-                          return 'SymbolicLink-f'
+                          return 'SymLink-f'
                       }
                       Else
                       {
