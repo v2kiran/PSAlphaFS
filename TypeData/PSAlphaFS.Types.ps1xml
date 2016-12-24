@@ -5,7 +5,7 @@
 		<Members>
 			<ScriptProperty>
 				<Name>Mode</Name>
-				<GetScriptBlock>                  if ( $this.EntryInfo.IsDirectory ) {  if ( $this.EntryInfo.IsSymbolicLink ){  return 'SymbolicLink-d'  }   Else     {  return 'Directory' }  } Else  {   if ( $this.EntryInfo.IsSymbolicLink )   {  return 'SymbolicLink-f'                   }                      Else                      {                          return 'File'                      }                  }			</GetScriptBlock>
+				<GetScriptBlock>                  if ( $this.EntryInfo.IsDirectory ) {  if ( $this.EntryInfo.IsSymbolicLink ){  return 'SymLink-d'  }   Else     {  return 'Directory' }  } Else  {   if ( $this.EntryInfo.IsSymbolicLink )   {  return 'SymLink-f'                   }                      Else                      {                          return 'File'                      }                  }			</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>PSIsContainer</Name>
