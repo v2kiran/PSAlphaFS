@@ -1,15 +1,3 @@
-
-#Define Alphafs Class Shortcuts
-$DirObject = [Alphaleonis.Win32.Filesystem.Directory]
-$FileObject = [Alphaleonis.Win32.Filesystem.File]
-$FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
-$PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
-$PathFSFormatObject = [Alphaleonis.Win32.Filesystem.PathFormat]
-$dirEnumOptionsFSObject = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]
-$copyFsObject = [Alphaleonis.Win32.Filesystem.CopyOptions]
-$linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
-
-
 # .ExternalHelp PSAlphafs.psm1-help.xml
 function Get-LongChildItem
 {
@@ -18,16 +6,6 @@ function Get-LongChildItem
 	Param
 	(
 		# Specify the Path to the File or Folder
-		[ValidateScript({ 
-					if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) -or  [Alphaleonis.Win32.Filesystem.File]::Exists($_)  ) 
-					{
-						$true
-					}
-					Else
-					{
-						Write-Warning -Message ("Get-LongChildItem:`tPath '{0}' does not exist`n`n" -f $_) 
-					}
-		})]
 		[Parameter(ValueFromPipelineByPropertyName,
 				ValueFromPipeline,
 		Position = 0)]
@@ -110,6 +88,19 @@ function Get-LongChildItem
 	{
 		foreach ($pItem in $Path)
 		{
+			# Check if path is relative
+			if(-not $PathFSObject::IsPathRooted($Path, $true))
+			{
+				$pItem = $PathFSObject::Combine($PWD, $pItem.TrimStart('.\'))
+			}
+	
+			# Check if path exists on the filesystem
+			if(-not ($FileObject::Exists($pItem) -or $DirObject::Exists($pItem)))
+			{
+				Write-Warning -Message ("Get-LongChildItem:`tPath '{0}' dosent exist." -f $pItem)
+				continue
+			}
+
 			$PathObject = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $pItem, $PathFSFormatObject::FullPath
   
 			if($PathObject.EntryInfo.IsDirectory)
@@ -164,17 +155,7 @@ function Get-LongItem
 	[CmdletBinding()]
 	Param
 	(
-		# Specify the Path to the File or Folder
-		[ValidateScript({ 
-					if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) -or  [Alphaleonis.Win32.Filesystem.File]::Exists($_)  ) 
-					{
-						$true
-					}
-					Else
-					{
-						Write-Warning -Message ("Get-LongItem:`tPath '{0}' does not exist`n`n" -f $_) 
-					}
-		})]        
+		# Specify the Path to the File or Folder      
 		[Parameter(Mandatory,
 				ValueFromPipelineByPropertyName,
 				ValueFromPipeline,
@@ -192,6 +173,19 @@ function Get-LongItem
 	{
 		foreach ($pItem in $Path)
 		{
+			# Check if path is relative
+			if(-not $PathFSObject::IsPathRooted($Path, $true))
+			{
+				$pItem = $PathFSObject::Combine($PWD, $pItem.TrimStart('.\'))
+			}
+	
+			# Check if path exists on the filesystem
+			if(-not ($FileObject::Exists($pItem) -or $DirObject::Exists($pItem)))
+			{
+				Write-Warning -Message ("Get-LongItem:`tPath '{0}' dosent exist." -f $pItem)
+				continue
+			}
+			
 			New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $pItem, $PathFSFormatObject::FullPath
 		}
         
@@ -210,20 +204,10 @@ function Get-LongItem
 # .ExternalHelp PSAlphafs.psm1-help.xml
 function Rename-LongItem
 {
-	[CmdletBinding(SupportsShouldProcess,ConfirmImpact = 'High')]
+	[CmdletBinding(SupportsShouldProcess,ConfirmImpact = 'High',DefaultParameterSetName = 'Name')]
 	Param
 	(
-		# The Path to the File or Folder    
-		[ValidateScript({ 
-					if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) -or  [Alphaleonis.Win32.Filesystem.File]::Exists($_)  ) 
-					{
-						$true
-					}
-					Else
-					{
-						Write-Warning -Message ("Rename-LongItem:`tPath '{0}' does not exist`n`n" -f $_) 
-					}
-		})]           
+		# The Path to the File or Folder             
 		[Alias('FullName')]
 		[Parameter(Mandatory,
 				ValueFromPipelineByPropertyName,
@@ -234,10 +218,19 @@ function Rename-LongItem
        
 		[Parameter(Mandatory,
 				ValueFromPipelineByPropertyName,
+				ParameterSetName = 'Name',
 		Position = 1)]       
 		[String]
 		$NewName,
+		
+		[Parameter(Mandatory,
+				ValueFromPipelineByPropertyName,
+				ParameterSetName = 'Extension',
+		Position = 1)]       
+		[String]
+		$NewExtension,		
         
+		#[parameter(ParameterSetName = 'Name')]
 		[Switch]
 		$Force        
         
@@ -246,34 +239,211 @@ function Rename-LongItem
 
 	Begin
 	{
-
+		$ReplaceExisting = $MoveOptions::ReplaceExisting
 	}
 	Process
 	{       
-		$Parent = $PathFSObject::GetDirectoryName($Path)
-		$NewPath = $PathFSObject::Combine($Parent, $NewName) 
-		$ReplaceExisting = [Alphaleonis.Win32.Filesystem.MoveOptions]::ReplaceExisting
-        
-		if($PSCmdlet.ShouldProcess($NewPath,"Rename File: $Path") )
+		
+
+		if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path))
 		{
-			if($Force)
+			$Path = $PathFSObject::Combine($PWD, $Path.TrimStart('.\'))
+		}
+		
+		if(-not ($FileObject::Exists($Path) -or $DirObject::Exists($Path)))
+		{
+			Write-Warning -Message ("Rename-LongItem:`tPath '{0}' dosent exist." -f $Path)
+			return
+		}
+		
+		$PathObject = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
+		
+		if($PathObject.EntryInfo.IsDirectory)
+		{
+			$isfile = $false
+			$fsObject = $DirObject
+			
+		}else 
+		{
+			$isfile = $true
+			$fsObject = $FileObject
+		}
+					
+        
+		if($PSCmdlet.ParameterSetName -eq 'Name' )
+		{
+			
+			if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($NewName))
 			{
-				Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
-				$DirObject::Move($Path, $NewPath,$ReplaceExisting)              
+				$NewPath = $PathFSObject::Combine($PWD, $NewName.TrimStart('.\'))
 			}
 			Else
 			{
+				$NewPath = $NewName
+			}	
+			
+			if($Path -eq $NewPath)
+			{
+				Write-Warning ("Rename-LongItem:`t{0} and {1} are the same" -f $Path, $NewPath)
+				return
+			}					
+			
+			if($isfile)
+			{
+				# check if there is an existing folder with the same name as the file we are trying to create
 				if($DirObject::Exists($NewPath))
 				{
-					Write-Warning -Message ("Rename-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $NewPath)
+					Write-Warning ("Rename-LongItem: A Directory with the same name '{0}' already exists." -f $NewPath)
+					return
 				}
+				#Create a file
+				if($FileObject::Exists($NewPath))
+				{
+					if($Force)
+					{                          
+						     
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$FileObject::Move($Path, $NewPath,$ReplaceExisting, $PathFSFormatObject::FullPath)
+																				
+					}
+					Else
+					{
+						Write-Warning -Message ("Rename-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $NewPath)
+					}
+            
+				}# file exists	
 				Else
 				{
-					Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
-					$DirObject::Move($Path, $NewPath)                 
-				}
+					if($PSCmdlet.ShouldProcess("Item:`t$path Destination:`t$NewName","Rename File"))
+					{
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$FileObject::Move($Path, $NewPath, $PathFSFormatObject::FullPath)					
+					}
+				
+				}			
 			}
+			# if path is a file	
+			Else
+			{
+				# check if there is an existing folder with the same name as the file we are trying to create
+				if($FileObject::Exists($NewPath))
+				{
+					Write-Warning ("Rename-LongItem: A File with the same name '{0}' already exists." -f $NewPath)
+					return
+				}
+				#Create a file
+				if($DirObject::Exists($NewPath))
+				{
+					if($Force)
+					{                          
+						     
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$DirObject::Move($Path, $NewPath,$ReplaceExisting, $PathFSFormatObject::FullPath)
+																				
+					}
+					Else
+					{
+						Write-Warning -Message ("Rename-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $NewPath)
+					}
+            
+				}# file exists	
+				Else
+				{
+					if($PSCmdlet.ShouldProcess("Item:`t$path Destination:`t$NewName","Rename File"))
+					{
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$DirObject::Move($Path, $NewPath, $PathFSFormatObject::FullPath)					
+					}			
+				}
+				# Directory				
+			
+			}	
 		}
+		#set 
+		if($PSCmdlet.ParameterSetName -eq 'Extension' )
+		{
+			$NewPath = $PathFSObject::ChangeExtension($Path, $NewExtension)
+			if($Path -eq $NewPath)
+			{
+				Write-Warning ("Rename-LongItem:`t{0} and {1} are the same" -f $Path, $NewPath)
+				return
+			}
+			
+			if($isfile)
+			{
+				# check if there is an existing folder with the same name as the file we are trying to create
+				if($DirObject::Exists($NewPath))
+				{
+					Write-Warning ("New-LongItem: A Directory with the same name '{0}' already exists." -f $NewPath)
+					return
+				}
+				#Create a file
+				if($FileObject::Exists($NewPath))
+				{
+					if($Force)
+					{                          
+						     
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$FileObject::Move($Path, $NewPath,$ReplaceExisting, $PathFSFormatObject::FullPath)
+																				
+					}
+					Else
+					{
+						Write-Warning -Message ("Rename-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $NewPath)
+					}
+            
+				}# file exists	
+				Else
+				{
+					if($PSCmdlet.ShouldProcess("Item:`t$Path`tDestination:`t$($PathFSObject::ChangeExtension($Path, $NewExtension))",'Changing Extension'))
+					{
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$FileObject::Move($Path, $NewPath, $PathFSFormatObject::FullPath)					
+					}
+				
+				}			
+			}
+			# if path is a file	
+			Else
+			{
+				# check if there is an existing folder with the same name as the file we are trying to create
+				if($FileObject::Exists($NewPath))
+				{
+					Write-Warning ("New-LongItem: A File with the same name '{0}' already exists." -f $NewPath)
+					return
+				}
+				#Create a file
+				if($DirObject::Exists($NewPath))
+				{
+					if($Force)
+					{                          
+						     
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$DirObject::Move($Path, $NewPath,$ReplaceExisting, $PathFSFormatObject::FullPath)
+																				
+					}
+					Else
+					{
+						Write-Warning -Message ("Rename-LongItem:`tAn item with the same name already exists at '{0}'.`nUse '-Force' to overwrite" -f $NewPath)
+					}
+            
+				}# file exists	
+				Else
+				{
+					if($PSCmdlet.ShouldProcess("Item:`t$Path`tDestination:`t$($PathFSObject::ChangeExtension($Path, $NewExtension))",'Changing Extension'))
+					{
+						Write-Verbose -Message ("Rename-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
+						$DirObject::Move($Path, $NewPath, $PathFSFormatObject::FullPath)					
+					}			
+				}
+				# Directory				
+			
+			}		
+					
+			
+
+		}
+		#set Extension		
 
     
 	}#Process
@@ -290,17 +460,7 @@ function Copy-LongItem
 	[CmdletBinding()]
 	Param
 	(
-		# The Path to the File or Folder
-		[ValidateScript({ 
-					if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) -or  [Alphaleonis.Win32.Filesystem.File]::Exists($_)  ) 
-					{
-						$true
-					}
-					Else
-					{
-						Write-Warning -Message ("Copy-LongItem:`tPath '{0}' does not exist`n`n" -f $_) 
-					}
-		})]        
+		# The Path to the File or Folder      
 		[Alias('FullName')]
 		[Parameter(Mandatory,
 				ValueFromPipelineByPropertyName,
@@ -352,6 +512,18 @@ function Copy-LongItem
 	}
 	Process
 	{       
+	
+		if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path,$true))
+		{
+			$Path = $PathFSObject::Combine($PWD, $Path.TrimStart('.\'))
+		}
+		
+		if(-not ($FileObject::Exists($Path) -or $DirObject::Exists($Path)))
+		{
+			Write-Warning -Message ("Copy-LongItem:`tPath '{0}' dosent exist." -f $Path)
+			return
+		}
+			
 		$PathObject = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path, $PathFSFormatObject::FullPath
         
 		$basename = $PathFSObject::GetFileName($Path)
@@ -447,17 +619,7 @@ function Remove-LongItem
 	[CmdletBinding()]
 	Param
 	(
-		# The Path to the File or Folder
-		[ValidateScript({ 
-					if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) -or  [Alphaleonis.Win32.Filesystem.File]::Exists($_)  ) 
-					{
-						$true
-					}
-					Else
-					{
-						Write-Warning -Message ("Remove-LongItem:`tPath '{0}' does not exist`n`n" -f $_) 
-					}
-		})]         
+		# The Path to the File or Folder        
 		[Alias('FullName')]
 		[Parameter(Mandatory,
 				ValueFromPipelineByPropertyName,
@@ -481,7 +643,19 @@ function Remove-LongItem
         
 	}
 	Process
-	{       
+	{      
+	
+		if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path,$true))
+		{
+			$Path = $PathFSObject::Combine($PWD, $Path.TrimStart('.\'))
+		}
+		
+		if(-not ($FileObject::Exists($Path) -or $DirObject::Exists($Path)))
+		{
+			Write-Warning -Message ("Remove-LongItem:`tPath '{0}' dosent exist." -f $Path)
+			return
+		}
+			 
 		$PathObject = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
 
         
