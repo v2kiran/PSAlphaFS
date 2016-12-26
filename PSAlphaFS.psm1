@@ -1222,7 +1222,7 @@ function Get-LongFreeDriveLetter
 			#map drive
 			try
 			{
-				Write-Verbose -Message ("Get-FreeDriveLetter:`t Listing the first free DriveLetter")
+				Write-Verbose -Message ("Get-LongFreeDriveLetter:`t Listing the first free DriveLetter")
 				[Alphaleonis.Win32.Filesystem.DriveInfo]::GetFreeDriveLetter()
 			}
 			catch
@@ -1236,7 +1236,7 @@ function Get-LongFreeDriveLetter
 			#map drive
 			try
 			{
-				Write-Verbose -Message ("Get-FreeDriveLetter:`t Listing the Last free DriveLetter")
+				Write-Verbose -Message ("Get-LongFreeDriveLetter:`t Listing the Last free DriveLetter")
 				[Alphaleonis.Win32.Filesystem.DriveInfo]::GetFreeDriveLetter($true)
 			}
 			catch
