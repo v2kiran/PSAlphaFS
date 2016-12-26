@@ -1336,7 +1336,7 @@ function Get-LongDirectorySize
 		
 		if(-not $DirObject::Exists($Path))
 		{
-			Write-Warning -Message ("Get-LongDirectorySize:`tPath '{0}' dosent exist." -f $Path)
+			Write-Warning -Message ("Get-LongDirectorySize:`tPath '{0}' either is not a directory or it dosent exist." -f $Path)
 			return
 		}
 		
