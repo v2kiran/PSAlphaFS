@@ -24,8 +24,8 @@
 				<GetScriptBlock>					$this.FullName.Length			</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
-				<Name>IsPathLong</Name>
-				<GetScriptBlock>					if($this.FullName.Length -ge 260){return $true}else{return $false}			</GetScriptBlock>
+				<Name>IsLongPath</Name>
+				<GetScriptBlock>					$this.EntryInfo.IsLongPath			</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>IsSymbolicLink</Name>
