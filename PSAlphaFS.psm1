@@ -1293,23 +1293,13 @@ function Get-LongDirectorySize
 	[CmdletBinding()]
 	Param
 	(
-		# Specify the Path to a Folder
-		[ValidateScript({ 
-					if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) ) 
-					{
-						$true
-					}
-					Else
-					{
-						Write-Warning -Message ("Get-LongDirectorySize:`tDirectory '{0}' does not exist`n`n" -f $_) 
-					}
-		})]        
-		[Parameter(Mandatory,
+		# Specify the Path to a Folder      
+		[Parameter(
 				ValueFromPipelineByPropertyName,
 				ValueFromPipeline,
 		Position = 0)]
 		[String]
-		$Path,
+		$Path = $pwd,
 
 		# Enumerate Subdirectories
 		[Switch] 
@@ -1324,7 +1314,7 @@ function Get-LongDirectorySize
 	Begin
 	{  
 		$privilegeEnabler = New-Object -TypeName Alphaleonis.Win32.Security.PrivilegeEnabler -ArgumentList ([Alphaleonis.Win32.Security.Privilege]::Backup, $null)
-		$dirEnumOptions = $dirEnumOptionsFSObject::SkipReparsePoints 
+		$dirEnumOptions = $dirEnumOptionsFSObject::SkipReparsePoints
 
 		if($PSBoundParameters.Containskey('Recurse') )
 		{
@@ -1338,6 +1328,27 @@ function Get-LongDirectorySize
 	}
 	Process
 	{
+
+		if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path))
+		{
+			$Path = $PathFSObject::Combine($PWD, $Path.TrimStart('.\'))
+		}
+		
+		if(-not $DirObject::Exists($Path))
+		{
+			Write-Warning -Message ("Get-LongDirectorySize:`tPath '{0}' dosent exist." -f $Path)
+			return
+		}
+		
+		$PathObject = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
+		
+		if(-not $PathObject.EntryInfo.IsDirectory)
+		{
+			Write-Warning -Message ("Get-LongDirectorySize:`tPlease prove a directory name as input to the path {0} parameter" -f $Path)
+			return
+			
+		} 
+		
 
 		$ResultHash = $DirObject::GetProperties( $Path, $dirEnumOptions, $PathFSFormatObject::FullPath)
 		$size = $ResultHash.Size

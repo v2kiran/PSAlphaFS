@@ -1,4 +1,13 @@
-
+#Define Alphafs Class Shortcuts
+$DirObject = [Alphaleonis.Win32.Filesystem.Directory]
+$FileObject = [Alphaleonis.Win32.Filesystem.File]
+$FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
+$PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
+$PathFSFormatObject = [Alphaleonis.Win32.Filesystem.PathFormat]
+$dirEnumOptionsFSObject = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]
+$copyFsObject = [Alphaleonis.Win32.Filesystem.CopyOptions]
+$linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
+$MoveOptions = [Alphaleonis.Win32.Filesystem.MoveOptions]
 
 Function GetDotNetVer {
 	#https://gallery.technet.microsoft.com/scriptcenter/Detect-NET-Framework-120ec923
@@ -81,20 +90,6 @@ else
 Write-Verbose "Highest installed version of dot net:`t$installed_dotnetversion"
 # Load the AlphaFS assembly
 Add-Type -Path $libpath
-
-
-
-#Define Alphafs Class Shortcuts
-$DirObject = [Alphaleonis.Win32.Filesystem.Directory]
-$FileObject = [Alphaleonis.Win32.Filesystem.File]
-$FileinfoObject = [Alphaleonis.Win32.Filesystem.FileInfo]
-$PathFSObject = [Alphaleonis.Win32.Filesystem.Path]
-$PathFSFormatObject = [Alphaleonis.Win32.Filesystem.PathFormat]
-$dirEnumOptionsFSObject = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]
-$copyFsObject = [Alphaleonis.Win32.Filesystem.CopyOptions]
-$linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
-$MoveOptions = [Alphaleonis.Win32.Filesystem.MoveOptions]
-
 
 
 # function to match file extensions
@@ -216,6 +211,12 @@ Function newlongitemhelper {
 				
 			if($Value)
 			{
+					
+					if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($value))
+					{
+						$value = $PathFSObject::Combine($PWD, $value.TrimStart('.\'))
+					}
+				
 					$ExistingFile_Leaf = $PathFSObject::GetFileName($value) 
 					$ExistingFile_info = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Value
 					$ExistingDirectory_info = New-Object Alphaleonis.Win32.Filesystem.DirectoryInfo -ArgumentList $Value
@@ -273,6 +274,12 @@ Function newlongitemhelper {
 					
 			if($Value)
 			{
+					
+					if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($value))
+					{
+						$value = $PathFSObject::Combine($PWD, $value.TrimStart('.\'))
+					}
+				
 					$ExistingFile_Leaf = $PathFSObject::GetFileName($value) 
 					$ExistingFile_info = New-Object Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Value
 					$ExistingDirectory_info = New-Object Alphaleonis.Win32.Filesystem.DirectoryInfo -ArgumentList $Value
