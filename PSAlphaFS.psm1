@@ -1052,46 +1052,61 @@ function Mount-LongShare
 	}
 	Process
 	{
-		if($DriveLetter -notmatch '[aA-zZ]:')
-		{
-			$DriveLetter = "$DriveLetter`:"
-		}
+		$DriveLetter = FormatDriveLetter $DriveLetter
 		
-		if($PSCmdlet.ParameterSetName -eq 'Credential')
+		if(-not (Test-Path $DriveLetter))
 		{
-			$NetWorkCreds = New-Object -TypeName System.Net.NetworkCredential -ArgumentList @($Credential.UserName, $Credential.Password)
-			$Domain = $Credential.GetNetworkCredential().domain
-			
-			if($Domain)
-			{
-				$NetWorkCreds.Domain = $Domain
-			}
 
-			#map drive
-			try
+			if(-not (CheckMappedDriveExists $DriveLetter $NetworkShare))
 			{
-				Write-Verbose -Message ("Mount-LongShare:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}'] with Credentials '[{2}']" -f $NetWorkShare, $DriveLetter, $Credential.UserName)
-				$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare, $Credential, $false, $true, $true)
-			}
-			catch
-			{
-				throw $_
-			}
-		}# Parameterset Credential
 		
-		if($PSCmdlet.ParameterSetName -eq 'Simple')
+				if($PSCmdlet.ParameterSetName -eq 'Credential')
+				{
+					$NetWorkCreds = New-Object -TypeName System.Net.NetworkCredential -ArgumentList @($Credential.UserName, $Credential.Password)
+					$Domain = $Credential.GetNetworkCredential().domain
+					
+					if($Domain)
+					{
+						$NetWorkCreds.Domain = $Domain
+					}
+
+					#map drive
+					try
+					{
+						Write-Verbose -Message ("Mount-LongShare:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}'] with Credentials '[{2}']" -f $NetWorkShare, $DriveLetter, $Credential.UserName)
+						$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare, $Credential, $false, $true, $true)
+					}
+					catch
+					{
+						throw $_
+					}
+				}# Parameterset Credential
+				
+				if($PSCmdlet.ParameterSetName -eq 'Simple')
+				{
+					#map drive
+					try
+					{
+						Write-Verbose -Message ("Mount-LongShare:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}']" -f $NetWorkShare, $DriveLetter)
+						$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare)
+					}
+					catch
+					{
+						throw $_
+					}
+				}# Parameterset Simple
+
+			}# check if share is already mapped	
+			else 
+			{
+				Write-Warning -Message ("Mount-LongShare:`t The Drive ['{0}'] is already mapped to share ['{1}']" -f $DriveLetter, $NetWorkShare) 
+			}
+		}
+		else 
 		{
-			#map drive
-			try
-			{
-				Write-Verbose -Message ("Mount-LongShare:`t Mapping NetWorkShare ['{0}'] to DriveLetter ['{1}']" -f $NetWorkShare, $DriveLetter)
-				$MapDrive = [Alphaleonis.Win32.Network.Host]::ConnectDrive($DriveLetter, $NetWorkShare)
-			}
-			catch
-			{
-				throw $_
-			}
-		}# Parameterset Simple
+			Write-Warning -Message ("Mount-LongShare:`t The Drive ['{0}'] is in use" -f $DriveLetter)
+		}
+
         
 	}#Process
 	End
@@ -1106,7 +1121,7 @@ function DisMount-LongShare
 	[CmdletBinding()]
 	Param
 	(
-		# Specify the Local Drive the NetworkShare is to be Mapped to    
+		# Specify the Local Drive the NetworkShare is to be Mapped to    	
 		[Parameter(Mandatory,
 				ValueFromPipelineByPropertyName,
 				ValueFromPipeline,
@@ -1126,10 +1141,14 @@ function DisMount-LongShare
 	}
 	Process
 	{
-		if($DriveLetter -notmatch '[aA-zZ]:')
-		{
-			$DriveLetter = "$DriveLetter`:"
+		
+		$DriveLetter = FormatDriveLetter $DriveLetter
+		if( -not (Test-path $DriveLetter )) 
+		{ 
+			Write-warning ("DisMount-LongShare:`tPath '{0}' does not exist`n`n" -f $DriveLetter)
+			return
 		}
+		
 					
 		#map drive
 		try
@@ -1381,89 +1400,3 @@ function Get-LongDirectorySize
 
 
 Set-Alias -Name ldir -Value Get-LongChildItem
-
-# DSC resources
-# These are class based so will only work in PS v5
-
-<#
-if($PSVersionTable.PSVersion.Major -ge 5)
-{
-	enum Ensure
-	{
-		Absent
-		Present
-	}
-	
-	[DscResource()]
-	class cPSAlphaFSMapDrive
-	{
-		[DscProperty(Key)]
-		[string] $DriveLetter
-
-		[DscProperty(Mandatory)]
-		[string] $NetworkShare
-
-		[DscProperty()]
-		[PSCredential] $Credential
-
-		[DscProperty()]
-		[Bool] $Force		
-
-		[DscProperty(Mandatory)]
-		[Ensure] $Ensure
-
-
-		[cPSAlphaFSMapDrive] Get()
-		{
-			return $this			
-		}# end get
-
-		[void] Set()
-		{
-
-			$params = 
-			@{
-				DriveLetter = (FormatDriveLetter $this.DriveLetter)
-				NetworkShare = $this.NetworkShare
-				Ensure = $this.Ensure
-			}
-			if($this.Credential) {$params.Add('Credential', $this.Credential)}
-			if($this.Force) {$params.Add('Force', $this.Force)}
-
-
-			if ($this.Ensure -eq [Ensure]::Present)
-			{
-				'Force','Ensure' | ForEach-Object {$null = $params.Remove($_)}
-				Mount-LongShare @Params
-			}
-			else
-			{
-				'Credential','NetworkShare','Ensure' | ForEach-Object {$null = $params.Remove($_)}
-				DisMount-LongShare @Params
-			}
-		}# end set
-
-		[bool] Test()
-		{
-			$DriveLetterFormatted = FormatDriveLetter $this.DriveLetter
-
-			# present case
-			if ($this.Ensure -eq [Ensure]::Present)
-			{
-				return CheckMappedDriveExists $DriveLetterFormatted $this.NetworkShare
-			}
-			# absent case
-			else
-			{
-				return (-not (CheckMappedDriveExists $DriveLetterFormatted $this.NetworkShare))
-			}
-		}# end bool test
-
-	}
-	#cPSAlphaFSMapDrive
-
-	#$null = New-PSClassInstance -TypeName cPSAlphaFSMapDrive
-
-}
-# if ps version is ge 5
-#>

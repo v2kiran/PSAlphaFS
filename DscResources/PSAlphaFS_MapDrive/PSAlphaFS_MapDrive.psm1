@@ -1,6 +1,4 @@
 
-. (Join-Path -Path $PSScriptRoot -ChildPath '..\Initialize-PSAlphaFSDscResource.ps1' -Resolve)
-
 function Get-TargetResource
 {
     [CmdletBinding()]

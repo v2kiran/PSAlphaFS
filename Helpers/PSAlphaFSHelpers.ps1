@@ -95,7 +95,7 @@ $MoveOptions = [Alphaleonis.Win32.Filesystem.MoveOptions]
 Function FormatDriveLetter ([string]$DriveLetter)
 {
 	#Format driveletter
-	if($DriveLetter -notmatch '[aA-zZ]:')
+	if($DriveLetter -notmatch '[aA-zZ]:\\')
 	{
 		$DriveLetter = "$DriveLetter`:\"
 	}
