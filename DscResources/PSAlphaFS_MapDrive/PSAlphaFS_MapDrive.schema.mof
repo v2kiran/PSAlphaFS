@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("PSAlphaFS_MapDrive")]
+class PSAlphaFS_MapDrive : OMI_BaseResource
+{
+[Key] string DriveLetter;
+[Key] string NetworkShare;
+[write,EmbeddedInstance("MSFT_Credential")] string Credential;
+[write] boolean Force;
+[write] boolean isMappedDrivePresent;
+[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+};

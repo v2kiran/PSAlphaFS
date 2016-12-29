@@ -76,7 +76,6 @@ else
 }# if installed_dotnetversion
 
 
-Write-Verbose "Highest installed version of dot net:`t$installed_dotnetversion"
 # Load the AlphaFS assembly
 Add-Type -Path $libpath
 
@@ -93,8 +92,35 @@ $linktype = [Alphaleonis.Win32.Filesystem.SymbolicLinkTarget]
 $MoveOptions = [Alphaleonis.Win32.Filesystem.MoveOptions]
 
 
+Function FormatDriveLetter ([string]$DriveLetter)
+{
+	#Format driveletter
+	if($DriveLetter -notmatch '[aA-zZ]:')
+	{
+		$DriveLetter = "$DriveLetter`:\"
+	}
+	return $DriveLetter
+}
+
+Function CheckMappedDriveExists ([string]$DriveLetter, [String]$NetworkShare)
+{
+
+	$DriveLetterFormatted = FormatDriveLetter $DriveLetter
+	$isDrivePresent = [Alphaleonis.Win32.Filesystem.DriveInfo]::GetDrives() | Where-Object { ($_.DriveType -eq  'Network') -and ($_.DriveLetter -eq  $DriveLetterFormatted) -and ($_.UncPath -eq  $NetworkShare) }
+	if ($isDrivePresent)
+	{
+		Write-Verbose "MappedDrive ['$DriveLetterFormatted'] for NetworkShare ['$NetworkShare'] exists."
+		return $true
+	}
+	else
+	{
+		Write-Verbose "MappedDrive ['$DriveLetterFormatted'] for NetworkShare ['$NetworkShare'] does not exist."
+		return $false
+	}
+}
+
+
 # function to match file extensions
-# Part of this code is from https://github.com/kleinsimon/PSAlphaFS.net
 function CompareExtension([string[]]$Extension, $Filename)
 {
 	foreach ($p in $Extension)

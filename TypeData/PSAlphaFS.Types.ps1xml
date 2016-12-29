@@ -125,7 +125,7 @@
 				<GetScriptBlock>						
 				if($this.DriveType -eq 'Network')
 				{
-					return ([Alphaleonis.Win32.Filesystem.Path]::LocalToUnc($this.Name))
+					return ([Alphaleonis.Win32.Filesystem.Path]::LocalToUnc([Alphaleonis.Win32.Filesystem.Path]::RemoveTrailingDirectorySeparator($this.Name)))
 				}  			
 				</GetScriptBlock>
 			</ScriptProperty>			
