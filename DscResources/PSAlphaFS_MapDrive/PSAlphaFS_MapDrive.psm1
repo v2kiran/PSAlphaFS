@@ -81,6 +81,7 @@ function Set-TargetResource
         DriveLetter = (FormatDriveLetter $DriveLetter)
         NetworkShare = $NetworkShare
         Ensure = $Ensure
+        Verbose = $true
     }
 
     if($Credential) {$params.Add('Credential', $Credential)}
@@ -129,16 +130,30 @@ function Test-TargetResource
     )
 
 
-    $DriveLetterFormatted = FormatDriveLetter $DriveLetter
+    $DriveLetter = FormatDriveLetter $DriveLetter
 
     # present case
     if ($Ensure -eq 'Present')
     {
-        return (CheckMappedDriveExists $DriveLetterFormatted $NetworkShare)
+        if( (Test-Path $DriveLetter) -and (CheckMappedDriveExists $DriveLetter $NetworkShare)  )
+        {
+            return $true
+        }
+        else 
+        {
+            return $false    
+        }
+        
     }
-    # absent case
-    else
+    else     # absent case
     {
-        return (-not (CheckMappedDriveExists $DriveLetterFormatted $NetworkShare))
+        if( (Test-Path $DriveLetter) -and (CheckMappedDriveExists $DriveLetter $NetworkShare)  )
+        {
+            return $false
+        }
+        else 
+        {
+            return $true    
+        }
     }
 }
