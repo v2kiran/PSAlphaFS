@@ -60,7 +60,7 @@
 				<GetScriptBlock>					
 					if(-not ($this.EntryInfo.IsDirectory))
 					{
-						return ($this.GetHash([Alphaleonis.Win32.Security.HashType]::MD5))
+						return ($this.GetHash([Alphaleonis.Win32.Security.HashType]::SHA256))
 					}		
 				</GetScriptBlock>
 			</ScriptProperty>
