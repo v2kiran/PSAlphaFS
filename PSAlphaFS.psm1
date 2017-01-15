@@ -480,8 +480,8 @@ function Copy-LongItem
 
 		# If the source file is a symbolic link, 
 		# the destination file is also a symbolic link pointing to the same file that the source symbolic link is pointing to.
-		[Switch]
-		$CopySymbolicLink,
+		#[Switch]
+		#$CopySymbolicLink,
 
 		# The copy operation is performed using unbuffered I/O, bypassing system I/O cache resources. Recommended for very large file transfers.
 		[Switch]
