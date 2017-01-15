@@ -1014,6 +1014,7 @@ function Move-LongItem
 	}
 }#end function 
 
+# .ExternalHelp PSAlphafs.psm1-help.xml
 function Mount-LongShare
 {
 	[CmdletBinding(DefaultParameterSetName = 'Simple')]
@@ -1115,7 +1116,7 @@ function Mount-LongShare
 	}#end    
 }#End Function
 
-
+# .ExternalHelp PSAlphafs.psm1-help.xml
 function DisMount-LongShare
 {
 	[CmdletBinding()]
@@ -1184,7 +1185,7 @@ function DisMount-LongShare
 	}#end    
 }#End Function
 
-
+# .ExternalHelp PSAlphafs.psm1-help.xml
 function Get-LongMappedDrive
 {
 	[CmdletBinding()]
@@ -1218,6 +1219,7 @@ function Get-LongMappedDrive
 	}#end    
 }#End Function
 
+# .ExternalHelp PSAlphafs.psm1-help.xml
 function Get-LongFreeDriveLetter
 {
 	[CmdletBinding(DefaultParameterSetName = 'First')]
@@ -1273,6 +1275,7 @@ function Get-LongFreeDriveLetter
 	}#end    
 }#End Function
 
+# .ExternalHelp PSAlphafs.psm1-help.xml
 function Get-LongDiskDrive
 {
 	[CmdletBinding()]
@@ -1306,7 +1309,7 @@ function Get-LongDiskDrive
 	}#end    
 }#End Function
 
-
+# .ExternalHelp PSAlphafs.psm1-help.xml
 function Get-LongDirectorySize
 {
 	[CmdletBinding()]
