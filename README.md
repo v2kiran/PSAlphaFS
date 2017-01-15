@@ -12,6 +12,9 @@ PSAlphaFS is a wrapper for the ALphaFS .NET library providing useful powerShell 
 * Move-Item
 
 
+## Version
+Version 2.0.0.0  see [ChangeLog](https://github.com/v2kiran/PSAlphaFS/blob/master/Changelog.md)
+
 ## Installation
 
 You have 2 choices:
@@ -36,6 +39,9 @@ All cmdlets come with built-in help. To see sample usage of a cmdlet, just type:
 Get-Help Get-LongChildItem -Examples
 ```
 
+you can also see the list of exmaples here: [Examples](https://github.com/v2kiran/PSAlphaFS/blob/master/Examples.md)
+
+
 ## About PSAlphaFS
 
 ### Maximum Path Length Limitation
@@ -55,12 +61,25 @@ The cmdlets in this module have been prefixed with the word "long" to distinguis
 * Remove-LongItem
 * New-LongItem
 
+New in version 2.0
+* DisMount-LongShare
+* Get-LongDirectorySize
+* Get-LongDiskDrive
+* Get-LongFreeDriveLetter
+* Get-LongMappedDrive
+* Mount-LongShare
+
+
 
 Links:
 
 [MAX_PATH](https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx#maxpath)
 
 [AlphaFS](https://github.com/alphaleonis/AlphaFS)
+
+[Examples](https://github.com/v2kiran/PSAlphaFS/blob/master/Examples.md)
+
+[ChangeLog](https://github.com/v2kiran/PSAlphaFS/blob/master/Changelog.md)
 
 
 ## Note
