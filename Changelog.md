@@ -1,0 +1,59 @@
+        v2.0.0.0
+        - Major Release with numerous improvements and enhancements
+        - Module is now compatible with PS v3
+        - Module now uses Alphafs.dll v2.1.2(latest at the moment of this writing)
+        - All cmdlets work with relative paths
+        - New features\improvements in Existing Cmdlets
+            - Get-LongChildItem
+                - Lists directory items immediately and dosent wait until it is done enumerating the complete directory tree
+                - By default ignores errors(access denied) encountered during directory enumeration.
+                - Uses a simplified logic to enumerate the filesystem and work with include and exclude parameters                
+                - Symlinks are now shown by default and the cmdlet optionally adds a switch parameter(-SkipSymbolicLink) to hide listing them.
+                - The mode property now indicates whether a particular file or directory is a SymbolicLink
+                - filehash algorith SHA256
+                - Additional properties added
+                    - FileHash
+                    - Target
+                    - PSIsContainer
+                    - LinkType                      
+                    - IsPathLong        
+                    - IsSymbolicLink    
+                    - IsDirectory       
+                    - IsCompressed      
+                    - IsHidden          
+                    - IsEncrypted       
+                    - IsMountPoint      
+                    - IsOffline      
+            - New-LongItem
+                - Create Symbolic Links for files and folders
+                - Create HardLinks for files 
+                - Create text files and optionally add text content( can be an array of strings) with user specified encoding                   
+            - Remove-LongItem
+                - Added the ability to remove a file or folder with a trailing space in the name    
+            - Rename-LongItem
+                - Added the ability to rename\change file extension while retaining the file name.(-NewExtension Parameter)                               
+            - Copy-LongChildItem
+                - New Switch Parameters
+                    - CopySymbolicLink 
+                        - (If the source file is a symbolic link, destination is also a symbolic link pointing to the same file)
+                        - Not working at this moment.(github issue raised - https://github.com/alphaleonis/AlphaFS/issues/292)
+                    - NoBuffering  
+                        - (copy is performed using unbuffered I/O. Recommended for very large file transfers.)   
+                    - AllowDecryptedDestination
+                        - (An attempt to copy an encrypted file will succeed even if the destination copy cannot be encrypted.)                                    
+        - New Cmdlets    
+            - Mount-LongShare
+                - Map Network share with or without credentials.  
+            - DisMount-LongShare
+                - Remove mapped drive.                                 
+            - Get-LongMappedDrive
+                - List mapped drives on localmachine. 
+                - use format-list to view the UncPath property which shows the sharepath 
+            - Get-LongFreeDriveLetter
+                - Be default gets the first free driveletter and with the -last parameter will list the last free drive letter.  
+            - Get-LongDiskDrive
+                - Gets diskspace stats(used\free\percent).  
+            - Get-LongDirectorySize
+                - Gets the size of a folder.    
+                - Specify -Recurse to include subfolders and files  
+                - Specify -ContinueonError to ignore errors(may result in an incorrect directory size)   
