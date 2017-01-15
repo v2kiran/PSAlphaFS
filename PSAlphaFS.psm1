@@ -576,6 +576,7 @@ function Copy-LongItem
 		# Perform the copy     
 		try
 		{
+			Write-Verbose -Message ("Copy-LongItem:`tCopying '{0}' to '{1}'" -f $Path, $Destination)
 			$fsObject::Copy($Path, $Destination,$copyOptions)
 		}
 		catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException]
