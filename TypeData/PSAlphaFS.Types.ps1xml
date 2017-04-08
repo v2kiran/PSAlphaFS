@@ -10,11 +10,11 @@
 			<ScriptProperty>
 				<Name>PSIsContainer</Name>
 				<GetScriptBlock>                  $this.EntryInfo.IsDirectory 	</GetScriptBlock>
-			</ScriptProperty>	
+			</ScriptProperty>
 			<ScriptProperty>
 				<Name>LinkType</Name>
 				<GetScriptBlock>       $s = $this.EntryInfo.ReparsePointTag   ; switch($s){'Symlink' {return 'SymbolicLink';break};default {return $s}} 	</GetScriptBlock>
-			</ScriptProperty>						
+			</ScriptProperty>
 			<ScriptProperty>
 				<Name>BaseName</Name>
 				<GetScriptBlock>					[Alphaleonis.Win32.Filesystem.Path]::GetFileNameWithoutExtension($this.Name)			</GetScriptBlock>
@@ -57,22 +57,12 @@
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>FileHash</Name>
-				<GetScriptBlock>					
-					if(-not ($this.EntryInfo.IsDirectory))
-					{
-						return ($this.GetHash([Alphaleonis.Win32.Security.HashType]::SHA256))
-					}		
-				</GetScriptBlock>
+				<GetScriptBlock>										if(-not ($this.EntryInfo.IsDirectory))					{						return ($this.GetHash([Alphaleonis.Win32.Security.HashType]::SHA256))					}						</GetScriptBlock>
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>Target</Name>
-				<GetScriptBlock>					
-					if($this.EntryInfo.IsSymbolicLink)
-					{
-						return (([Alphaleonis.Win32.Filesystem.File]::GetLinkTargetInfo($this.FullName, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)).PrintName)
-					}		
-				</GetScriptBlock>
-			</ScriptProperty>									
+				<GetScriptBlock>										if($this.EntryInfo.IsSymbolicLink)					{						return (([Alphaleonis.Win32.Filesystem.File]::GetLinkTargetInfo($this.FullName, [Alphaleonis.Win32.Filesystem.PathFormat]::FullPath)).PrintName)					}						</GetScriptBlock>
+			</ScriptProperty>
 			<MemberSet>
 				<Name>PSStandardMembers</Name>
 				<Members>
@@ -122,13 +112,8 @@
 			</ScriptProperty>
 			<ScriptProperty>
 				<Name>UncPath</Name>
-				<GetScriptBlock>						
-				if($this.DriveType -eq 'Network')
-				{
-					return ([Alphaleonis.Win32.Filesystem.Path]::LocalToUnc([Alphaleonis.Win32.Filesystem.Path]::RemoveTrailingDirectorySeparator($this.Name)))
-				}  			
-				</GetScriptBlock>
-			</ScriptProperty>			
+				<GetScriptBlock>										if($this.DriveType -eq 'Network')				{					return ([Alphaleonis.Win32.Filesystem.Path]::LocalToUnc([Alphaleonis.Win32.Filesystem.Path]::RemoveTrailingDirectorySeparator($this.Name)))				}  							</GetScriptBlock>
+			</ScriptProperty>
 			<MemberSet>
 				<Name>Driveinfolistview</Name>
 				<Members>
@@ -144,30 +129,32 @@
 							<Name>Free</Name>
 							<Name>Used</Name>
 							<Name>Size</Name>
-							<Name>UncPath</Name>							
+							<Name>UncPath</Name>
 						</ReferencedProperties>
 					</PropertySet>
 				</Members>
 			</MemberSet>
 		</Members>
 	</Type>
-<Type>
-	<Name>PSAlphaFS.DirectorySize</Name>
-		<MemberSet>
-			<Name>PSStandardMembers</Name>
-			<Members>
-				<PropertySet>
-					<Name>DefaultDisplayPropertySet</Name>
-					<ReferencedProperties>
-						<Name>Path</Name>
-						<Name>Size</Name>
-						<Name>Directory</Name>
-						<Name>File</Name>
-						<Name>Count</Name>
-					</ReferencedProperties>
-				</PropertySet>
-			</Members>
-		</MemberSet>
-	</Members>
-</Type>	
+	<Type>
+		<Name>PSAlphaFS.DirectorySize</Name>
+		<Members>
+			<MemberSet>
+				<Name>PSStandardMembers</Name>
+				<Members>
+					<PropertySet>
+						<Name>DefaultDisplayPropertySet</Name>
+						<ReferencedProperties>
+							<Name>Path</Name>
+							<Name>Size</Name>
+							<Name>Directory</Name>
+							<Name>File</Name>
+							<Name>Hidden</Name>
+							<Name>Count</Name>
+						</ReferencedProperties>
+					</PropertySet>
+				</Members>
+			</MemberSet>
+		</Members>
+	</Type>
 </Types>

@@ -13,6 +13,12 @@
         <TypeName>Alphaleonis.Win32.Filesystem.DriveInfo</TypeName>
       </Types>
     </SelectionSet>
+    <SelectionSet>
+      <Name>PSAlphaFSDirectorySizeTypes</Name>
+      <Types>
+        <TypeName>PSAlphaFS.DirectorySize</TypeName>
+      </Types>
+    </SelectionSet>
   </SelectionSets>
   <ViewDefinitions>
     <View>
@@ -48,31 +54,7 @@
             <Wrap/>
             <TableColumnItems>
               <TableColumnItem>
-                <ScriptBlock>   
-                  if ( $_.EntryInfo.IsDirectory )
-                  {
-                      if ( $_.EntryInfo.IsSymbolicLink )
-                      {
-                          return 'SymLink-d'
-                      }
-                      Else
-                      {
-                          return 'Directory'
-                      }
-                  }
-                  Else
-                  {
-                      if ( $_.EntryInfo.IsSymbolicLink )
-                      {
-                          return 'SymLink-f'
-                      }
-                      Else
-                      {
-                          return 'File'
-                      }
-                  }
-       				                        
-                        </ScriptBlock>
+                <ScriptBlock>                     if ( $_.EntryInfo.IsDirectory )                  {                      if ( $_.EntryInfo.IsSymbolicLink )                      {                          return 'SymLink-d'                      }                      Else                      {                          return 'Directory'                      }                  }                  Else                  {                      if ( $_.EntryInfo.IsSymbolicLink )                      {                          return 'SymLink-f'                      }                      Else                      {                          return 'File'                      }                  }       				                                                </ScriptBlock>
               </TableColumnItem>
               <TableColumnItem>
                 <ScriptBlock>                      [String]::Format("{0,10}  {1,8}", $_.LastWriteTime.ToString("d"), $_.LastWriteTime.ToString("t"))                  </ScriptBlock>
@@ -95,85 +77,75 @@
       </ViewSelectedBy>
       <TableControl>
         <TableHeaders>
-                  <TableColumnHeader>
-                      <Label>DriveLetter</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>VolumeLabel</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>FileSystem</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>DriveType</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>FreePercent</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>UsedPercent</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>Free</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>Used</Label>
-                  </TableColumnHeader>
-                  <TableColumnHeader>
-                      <Label>Size</Label>
-                  </TableColumnHeader>                  
+          <TableColumnHeader>
+            <Label>DriveLetter</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>VolumeLabel</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>FileSystem</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>DriveType</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>FreePercent</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>UsedPercent</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Free</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Used</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Size</Label>
+          </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
-                  <TableRowEntry>
-                      <TableColumnItems>
-                          <TableColumnItem>
-                              <PropertyName>Name</PropertyName>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <PropertyName>VolumeLabel</PropertyName>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <PropertyName>DriveFormat</PropertyName>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <PropertyName>DriveType</PropertyName>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <Alignment>Right</Alignment>
-                              <ScriptBlock>
-                                  return ($_.DiskSpaceInfo.AvailableFreeSpacePercent)  
-                              </ScriptBlock>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <Alignment>Right</Alignment>
-                              <ScriptBlock>
-                                  return ($_.DiskSpaceInfo.UsedSpacePercent)  
-                              </ScriptBlock>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <Alignment>Right</Alignment>
-                              <ScriptBlock>
-                                  return ($_.DiskSpaceInfo.AvailableFreeSpaceUnitSize)  
-                              </ScriptBlock>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <Alignment>Right</Alignment>
-                              <ScriptBlock>
-                                  return ($_.DiskSpaceInfo.UsedSpaceUnitSize)  
-                              </ScriptBlock>
-                          </TableColumnItem>
-                          <TableColumnItem>
-                              <Alignment>Right</Alignment>
-                              <ScriptBlock>
-                                  return ($_.DiskSpaceInfo.TotalSizeUnitSize)  
-                              </ScriptBlock>
-                          </TableColumnItem>
-                      </TableColumnItems>
-                  </TableRowEntry>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <PropertyName>Name</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>VolumeLabel</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>DriveFormat</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>DriveType</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <Alignment>Right</Alignment>
+                <ScriptBlock>                                  return ($_.DiskSpaceInfo.AvailableFreeSpacePercent)                                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <Alignment>Right</Alignment>
+                <ScriptBlock>                                  return ($_.DiskSpaceInfo.UsedSpacePercent)                                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <Alignment>Right</Alignment>
+                <ScriptBlock>                                  return ($_.DiskSpaceInfo.AvailableFreeSpaceUnitSize)                                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <Alignment>Right</Alignment>
+                <ScriptBlock>                                  return ($_.DiskSpaceInfo.UsedSpaceUnitSize)                                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <Alignment>Right</Alignment>
+                <ScriptBlock>                                  return ($_.DiskSpaceInfo.TotalSizeUnitSize)                                </ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
         </TableRowEntries>
       </TableControl>
-    </View>  
-   <View>
+    </View>
+    <View>
       <Name>DriveInfoListView</Name>
       <ViewSelectedBy>
         <SelectionSetName>AlphaFSFileSystemDriveTypes</SelectionSetName>
@@ -184,33 +156,25 @@
             <ListItems>
               <ListItem>
                 <Label>DriveLetter</Label>
-                <ScriptBlock>
-                  return ($_.Name)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.Name)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <PropertyName>VolumeLabel</PropertyName>
               </ListItem>
               <ListItem>
                 <Label>FileSystem</Label>
-                <ScriptBlock>
-                  return ($_.DriveFormat)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.DriveFormat)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <PropertyName>DriveType</PropertyName>
               </ListItem>
               <ListItem>
                 <Label>FreeSpace</Label>
-                <ScriptBlock>
-                  return ($_.TotalFreeSpace)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.TotalFreeSpace)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <Label>Size</Label>
-                <ScriptBlock>
-                  return ($_.TotalSize)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.TotalSize)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <PropertyName>DosDeviceName</PropertyName>
@@ -226,38 +190,80 @@
               </ListItem>
               <ListItem>
                 <Label>ClusterSize</Label>
-                <ScriptBlock>
-                  return ($_.DiskSpaceInfo.ClusterSize)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.DiskSpaceInfo.ClusterSize)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <Label>BytesPerSector</Label>
-                <ScriptBlock>
-                  return ($_.DiskSpaceInfo.BytesPerSector)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.DiskSpaceInfo.BytesPerSector)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <Label>NumberOfFreeClusters</Label>
-                <ScriptBlock>
-                  return ($_.DiskSpaceInfo.NumberOfFreeClusters)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.DiskSpaceInfo.NumberOfFreeClusters)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <Label>SectorsPerCluster</Label>
-                <ScriptBlock>
-                  return ($_.DiskSpaceInfo.SectorsPerCluster)
-                </ScriptBlock>
+                <ScriptBlock>                  return ($_.DiskSpaceInfo.SectorsPerCluster)                </ScriptBlock>
               </ListItem>
               <ListItem>
                 <Label>TotalNumberOfClusters</Label>
-                <ScriptBlock>
-                  return ($_.DiskSpaceInfo.TotalNumberOfClusters)
-                </ScriptBlock>
-              </ListItem>              
+                <ScriptBlock>                  return ($_.DiskSpaceInfo.TotalNumberOfClusters)                </ScriptBlock>
+              </ListItem>
             </ListItems>
           </ListEntry>
         </ListEntries>
       </ListControl>
-    </View>      
+    </View>
+    <View>
+      <Name>PSAlphaFSDirectorySizeTableView</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>PSAlphaFSDirectorySizeTypes</SelectionSetName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>Path</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Size</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Directory</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>File</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Hidden</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Count</Label>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <PropertyName>Path</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Size</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Directory</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>File</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Hidden</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Count</PropertyName>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
   </ViewDefinitions>
 </Configuration>

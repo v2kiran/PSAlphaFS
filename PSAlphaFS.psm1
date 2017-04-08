@@ -1201,7 +1201,7 @@ function Get-LongDirectorySize {
                 [PSCustomObject]@{
                     pstypename = 'PSAlphaFS.DirectorySize'
                     Path = $pItem
-                    $Size_header = $size
+                    Size = $size
                     Directory = $ResultHash.Directory
                     FIle = $ResultHash.File
                     Hidden = $ResultHash.Hidden
@@ -1235,7 +1235,7 @@ function Get-LongDirectorySize {
             [PSCustomObject]@{
                 pstypename = 'PSAlphaFS.DirectorySize'
                 Path = $Path
-                $Size_header = $size
+                Size = $size
                 Directory = $ResultHash.Directory
                 FIle = $ResultHash.File
                 Hidden = $ResultHash.Hidden
