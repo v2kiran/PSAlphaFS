@@ -225,18 +225,24 @@
           </TableColumnHeader>
           <TableColumnHeader>
             <Label>Size</Label>
+            <Alignment>Right</Alignment>
+            <Width>12</Width>
           </TableColumnHeader>
           <TableColumnHeader>
             <Label>Directory</Label>
+            <Alignment>Right</Alignment>
           </TableColumnHeader>
           <TableColumnHeader>
             <Label>File</Label>
+            <Alignment>Right</Alignment>
           </TableColumnHeader>
           <TableColumnHeader>
             <Label>Hidden</Label>
+            <Alignment>Right</Alignment>
           </TableColumnHeader>
           <TableColumnHeader>
             <Label>Count</Label>
+            <Alignment>Right</Alignment>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>

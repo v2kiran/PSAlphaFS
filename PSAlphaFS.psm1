@@ -1193,7 +1193,7 @@ function Get-LongDirectorySize {
                     $Size_header = 'Size'
                 }
                 Else {
-                    $size = [System.Math]::Ceiling($size / "1$Unit")
+                    $size = [System.Math]::Round($size / "1$Unit")
                     $Size_header = "Size($Unit)"
                 }
 
@@ -1227,7 +1227,7 @@ function Get-LongDirectorySize {
                 $Size_header = 'Size'
             }
             Else {
-                $size = [System.Math]::Ceiling($size / "1$Unit")
+                $size = [System.Math]::Round($size / "1$Unit")
                 $Size_header = "Size($Unit)"
             }
 
