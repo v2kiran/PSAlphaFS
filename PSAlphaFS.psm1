@@ -422,6 +422,10 @@ function Copy-LongItem {
         
         [Switch]
         $Force,
+        
+        [Validateset('File', 'Directory')]
+        [String]
+        $DestinationType,        
 
         # If the source file is a symbolic link, 
         # the destination file is also a symbolic link pointing to the same file that the source symbolic link is pointing to.
@@ -439,13 +443,13 @@ function Copy-LongItem {
 
     Begin {
         $copyOptions = $copyFsObject::FailIfExists
-        if($PSBoundParameters.Containskey('CopySymbolicLink') ) {
+        if ($PSBoundParameters.Containskey('CopySymbolicLink') ) {
             $copyOptions = $copyOptions -bor $copyFsObject::CopySymbolicLink
         }  
-        if($PSBoundParameters.Containskey('NoBuffering') ) {
+        if ($PSBoundParameters.Containskey('NoBuffering') ) {
             $copyOptions = $copyOptions -bor $copyFsObject::NoBuffering
         }  
-        if($PSBoundParameters.Containskey('AllowDecryptedDestination') ) {
+        if ($PSBoundParameters.Containskey('AllowDecryptedDestination') ) {
             $copyOptions = $copyOptions -bor $copyFsObject::AllowDecryptedDestination
         }                       
         $copyOptions = [Alphaleonis.Win32.Filesystem.CopyOptions]$copyOptions
@@ -453,11 +457,11 @@ function Copy-LongItem {
     }
     Process {       
 	
-        if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path,$true)) {
+        if (-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path, $true)) {
             $Path = $PathFSObject::Combine($PWD, $Path.TrimStart('.\'))
         }
 		
-        if(-not ($FileObject::Exists($Path) -or $DirObject::Exists($Path))) {
+        if (-not ($FileObject::Exists($Path) -or $DirObject::Exists($Path))) {
             Write-Warning -Message ("Copy-LongItem:`tPath '{0}' dosent exist." -f $Path)
             return
         }
@@ -468,25 +472,35 @@ function Copy-LongItem {
         $dBasename = $PathFSObject::GetFileName($Destination)
         $dParent = $PathFSObject::GetDirectoryName($Destination)
         
-        $dBasenameObj = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $dBasename
-        $isFile = if($PathFSObject::HasExtension($dBasename) ) {
-            $true
+        if ($DestinationType -eq 'File') {
+            $isFile = $true
         }
-        else {
-            $false
-        } 
+        Elseif ($DestinationType -eq 'Directory') {
+            $isFile = $false
+        }
+        Else {
+            $isFile = if ($PathFSObject::HasExtension($dBasename) ) {
+                $true
+            }
+            else {
+                $false
+            } 
+                     
+        }
+
         
         # Create the directory tree before the copy
-        if($isFile) {
+        if ($isFile) {
             $Destination_isFile = $true
-            if( -not ( $DirObject::Exists($dParent))) {
+            if ( -not ( $DirObject::Exists($dParent))) {
                 $null = $DirObject::CreateDirectory($dParent)
             }
         }#destination is a file
         Else {
             $Destination_isDirectory = $true
-            if( -not ( $DirObject::Exists($Destination))) {
+            if ( -not ( $DirObject::Exists($Destination))) {
                 $null = $DirObject::CreateDirectory($Destination)
+                $Destination = $PathFSObject::Combine($Destination, $basename)
             } 
             Else {
                 $Destination = $PathFSObject::Combine($Destination, $basename)
@@ -495,7 +509,7 @@ function Copy-LongItem {
         
 
                 
-        if($PathObject.EntryInfo.IsDirectory) {
+        if ($PathObject.EntryInfo.IsDirectory) {
             $fsObject = $DirObject
         }
         else {
@@ -505,13 +519,13 @@ function Copy-LongItem {
         # Perform the copy     
         try {
             Write-Verbose -Message ("Copy-LongItem:`tCopying '{0}' to '{1}'" -f $Path, $Destination)
-            $fsObject::Copy($Path, $Destination,$copyOptions)
+            $fsObject::Copy($Path, $Destination, $copyOptions)
         }
         catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException] {
-            if($Force) {
+            if ($Force) {
                 # need to delete destination because the copy method dosent contain an overload that includes
                 # both the overwrite and copyoptions parameters
-                $DirObject::Delete($Destination, $true, $true, $PathFSFormatObject::FullPath) 
+                $fsObject::Delete($Destination, $true, $PathFSFormatObject::FullPath) 
 
                 Write-Verbose -Message ("Copy-LongItem:`t Overwriting existing item...Copying '{0}' to '{1}'" -f $Path, $Destination)
                 $fsObject::Copy($Path, $Destination, $copyOptions)               
@@ -524,9 +538,6 @@ function Copy-LongItem {
             throw $_
         }
     
-        
-        
-
     }#Process
     End {
         If ($privilegeEnabler) {
