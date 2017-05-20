@@ -527,7 +527,7 @@ function Copy-LongItem {
                 # both the overwrite and copyoptions parameters
                 $fsObject::Delete($Destination, $true, $PathFSFormatObject::FullPath) 
 
-                sleep -Milliseconds 300
+                Start-Sleep -Milliseconds 300
 
                 Write-Verbose -Message ("Copy-LongItem:`t Overwriting existing item...Copying '{0}' to '{1}'" -f $Path, $Destination)
                 $fsObject::Copy($Path, $Destination, $copyOptions)               
