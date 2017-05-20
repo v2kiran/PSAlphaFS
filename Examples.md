@@ -12,10 +12,33 @@ SYNOPSIS
     This command copies the drivers.txt file to the C:\temp\folder1 directory. 'folder1' is created if it dosent exist.
     -------------------------- EXAMPLE 2 --------------------------
     
-    PS C:\>Copy-LongItem C:\temp\logfiles -Destination C:\temp\newlogs
+    PS C:\>Copy-LongItem C:\temp\logfiles\ -Destination C:\temp\newlogs -Verbose
     
     
     This command copies the contents of the C:\Logfiles directory recursively to the C:\temp\newLogs directory. It creates the \newLogs subdirectory if it does not already exist.
+        -------------------------- EXAMPLE 3 --------------------------
+    
+    PS C:\>Copy-LongItem C:\temp\logfiles -Destination C:\temp\newlogs -Verbose
+    
+    
+This command copies the entire folder C:\Logfiles recursively to the C:\temp\newLogs. It creates the "newLogs" subdirectory if it does not already exist.
+        -------------------------- EXAMPLE 4 --------------------------
+    
+  $params = 
+ @{
+        Path =                  'C:\temp\test-psalphafs\source\file-01.txt'
+        Destination  =       'C:\temp\test-psalphafs\destination.dir1'
+        Force  =               $false
+        verbose =            $true
+        destinationtype = 'Directory'
+ }
+
+Copy-LongItem @params
+
+We use "splatting" to pass the parameters as a table to copy-longitem.  file 'file-01.txt' is copied to destination directory 'destination.dir1'. The destination directory 'destination.dir1' will be created if it dosent already exist.
+
+Note: The destination "destination.dir1" is a folder containing a period in its name and hence we also specify the "destinationtype" parameter.
+If  destinationtype parameter is not specified the destination would be treated as a file.
     -------------------------- EXAMPLE 3 --------------------------
     
     PS C:\>Copy-LongItem -Path C:\temp\win2012R2.iso -Destination C:\temp\2012R2.iso -Verbose -NoBuffering
@@ -149,58 +172,39 @@ SYNOPSIS
     
     -------------------------- EXAMPLE 1 --------------------------
     
-    PS C:\>Get-LongDirectorySize -Path D:\Github -Recurse
-    
-    Key                 Value
-    ---                 -----
-    Archive               321
-    Compressed              0
-    Device                  0
-    Directory             201
-    Encrypted               0
-    Hidden                  1
-    IntegrityStream         0
-    Normal                  0
-    NoScrubData             0
-    NotContentIndexed       0
-    Offline                 0
-    ReadOnly              264
-    ReparsePoint            0
-    SparseFile              0
-    System                  0
-    Temporary               0
-    File                  321
-    Total                 522
-    Size              3069696
-    SizeinMB                3
+    PS C:\>Get-LongDirectorySize -Path c:\temp
+
+Path        Size Directory File Hidden Count
+----        ---- --------- ---- ------ -----
+c:\temp 49337903        35   67      0   102
     
     
-    Gets the directory statistics for D:\Github, optionally enumerating the subfolders and files.
+Gets the directory statistics for c:\temp. Since the Unit size parameter was not specified the size of the folder is in "bytes".
     -------------------------- EXAMPLE 2 --------------------------
     
-    PS C:\>Get-LongDirectorySize -ContinueonError
+    PS C:\>Get-LongDirectorySize -Path c:\temp -Recurse -ContinueonError
+
+Path          Size Directory File Hidden Count
+----          ---- --------- ---- ------ -----
+c:\temp 7855289946      2087 4985     18  7072
     
     
-    Enumerates the files and folders in the current directory, and will ignore any exceptions\errors that may arise due to access or other issues.
-    Warning: using the -ContinueonError may result in an incorrect directory size.
+  List the aggregate size of all the files and folders in the temp directory, and will ignore any exceptions\errors that may arise due to access or other issues.
+Warning: using the -ContinueonError may result in an incorrect directory size.
+
     -------------------------- EXAMPLE 3 --------------------------
     
-    PS C:\>$githubDIR = Get-LongDirectorySize D:\Github -Recurse
+    PS C:\>Get-LongDirectorySize -Path c:\temp -Recurse -IncludeSubfolder -Unit MB
     
-    $githubDIR.Size
-    3069696
-    
-    $githubDIR.SizeinMB
-    3
-    
-    PS C:\temp\dsc>
-    
-    
-    The first command assigns the out of the cmdlet Get-LongDirectorySize to the variable github
-    the second command is used to access the size of the directory in bytes.
-    the third command lists the size in megabytes.
-    
-    Note: the unit of size kb\mb\gb\tb will change based on the size of the directory.
+Path                 Size Directory File Hidden Count
+c:\temp              7491      2084 4978     18  7062
+c:\temp\.vscode         0         0    2      0     2
+c:\temp\123             0         3    0      0     3
+c:\temp\234             0         2    1      0     3
+c:\temp\alpha1          1         4    7      0    11
+
+Recursively list the total size of the temp folder along with the sizes of all the subfolders. The size of the folders are calulated in megabytes.
+
 
 NAME
     Get-LongDiskDrive

@@ -151,9 +151,8 @@ Note: using this switch might result in an incorrect directory size.</maml:para>
 				<dev:code>Get-LongDirectorySize -Path c:\temp
 
 Path        Size Directory File Hidden Count
-
-
-c:\temp 49337903        33   67      0   100		</dev:code>
+----        ---- --------- ---- ------ -----
+c:\temp 49337903        35   67      0   102	</dev:code>
 				<dev:remarks>
 					<maml:para>Gets the directory statistics for c:\temp. Since the Unit size parameter was not specified the size of the folder is in "bytes".</maml:para>
 				</dev:remarks>
