@@ -2,7 +2,7 @@
 
 Sunday, May 21, 2017
 
-    -Copy-LongChildItem
+    -Copy-LongItem
      -DestinationType
         Specify whether the destination is a file or a folder. If this parameter is not specified the destination type is  inferred by           checking whether the destination item has an extension or not.
         If the destination has an extension then we assume it is a file and folder if not. As you can tell this is not always correct            because there can be folders with a period in them which can then be incorrectly inferred as a file.
