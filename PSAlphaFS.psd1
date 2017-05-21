@@ -12,7 +12,7 @@
     RootModule = 'PSAlphaFS.psm1'
 
     # Version number of this module.
-    ModuleVersion = '2.0.0.0'
+    ModuleVersion = '2.0.0.1'
 
     # ID used to uniquely identify this module
     GUID = '436fc4df-d981-4e21-9d0c-a892c3bc9fb6'
