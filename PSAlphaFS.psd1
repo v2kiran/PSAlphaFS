@@ -90,7 +90,7 @@
     AliasesToExport = @('ldir')
 
     # List of all modules packaged with this module.
-    ModuleList = @('PSAlphaFS.psm1')
+    #ModuleList = @('PSAlphaFS.psm1')
 
     # List of all files packaged with this module
     #FileList = @('Alphafs.dll','PSAlphaFS.psm1','PSAlphaFS.psd1','PSAlphaFS.Types.ps1xml','PSAlphaFS.Format.ps1xml')
