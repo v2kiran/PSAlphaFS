@@ -2,17 +2,17 @@
 
 Sunday, May 21, 2017
 
--Copy-LongChildItem
- -DestinationType
-    -Specify whether the destination is a file or a folder. If this parameter is not specified the destination type is  inferred by checking whether the destination item has an extension or not.
-    If the destination has an extension then we assume it is a file and folder if not. As you can tell this is not always correct because there can be folders with a period in them which can then be incorrectly inferred as a file.
-    Hence it is important to specify this parameter to get accurate results.
--Get-LongDirectorySize
-    -Changed output object from a hashtable to custom PSOBJECT.
-    -Unit
-        -Specify the unit type for folder size : ('KB', 'MB', 'GB', 'TB', 'PB', 'Bytes' )
-    -IncludeSubfolder
-        -Specify this parameter to list the sizes of the subfolders including the parent
+    -Copy-LongChildItem
+     -DestinationType
+        Specify whether the destination is a file or a folder. If this parameter is not specified the destination type is  inferred by           checking whether the destination item has an extension or not.
+        If the destination has an extension then we assume it is a file and folder if not. As you can tell this is not always correct            because there can be folders with a period in them which can then be incorrectly inferred as a file.
+        Hence it is important to specify this parameter to get accurate results.
+    -Get-LongDirectorySize
+        -Changed output object from a hashtable to custom PSOBJECT.
+        -Unit
+            -Specify the unit type for folder size : ('KB', 'MB', 'GB', 'TB', 'PB', 'Bytes' )
+        -IncludeSubfolder
+            -Specify this parameter to list the sizes of the subfolders including the parent
 
     Feature Requests:
         Issue 9 - List Size of all sub directories in Get-LongDirectorySize
