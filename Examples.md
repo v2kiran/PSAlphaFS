@@ -21,24 +21,24 @@ SYNOPSIS
     PS C:\>Copy-LongItem C:\temp\logfiles -Destination C:\temp\newlogs -Verbose
     
     
-This command copies the entire folder C:\Logfiles recursively to the C:\temp\newLogs. It creates the "newLogs" subdirectory if it does not already exist.
+    This command copies the entire folder C:\Logfiles recursively to the C:\temp\newLogs. It creates the "newLogs" subdirectory if it does not already exist.
         -------------------------- EXAMPLE 4 --------------------------
     
-  $params = 
- @{
-        Path =                  'C:\temp\test-psalphafs\source\file-01.txt'
-        Destination  =       'C:\temp\test-psalphafs\destination.dir1'
-        Force  =               $false
-        verbose =            $true
-        destinationtype = 'Directory'
- }
+      $params = 
+     @{
+            Path =                  'C:\temp\test-psalphafs\source\file-01.txt'
+            Destination  =       'C:\temp\test-psalphafs\destination.dir1'
+            Force  =               $false
+            verbose =            $true
+            destinationtype = 'Directory'
+     }
 
-Copy-LongItem @params
+    Copy-LongItem @params
 
-We use "splatting" to pass the parameters as a table to copy-longitem.  file 'file-01.txt' is copied to destination directory 'destination.dir1'. The destination directory 'destination.dir1' will be created if it dosent already exist.
+    We use "splatting" to pass the parameters as a table to copy-longitem.  file 'file-01.txt' is copied to destination directory           'destination.dir1'. The destination directory 'destination.dir1' will be created if it dosent already exist.
 
-Note: The destination "destination.dir1" is a folder containing a period in its name and hence we also specify the "destinationtype" parameter.
-If  destinationtype parameter is not specified the destination would be treated as a file.
+    Note: The destination "destination.dir1" is a folder containing a period in its name and hence we also specify the "destinationtype"    parameter.
+    If  destinationtype parameter is not specified the destination would be treated as a file.
     -------------------------- EXAMPLE 3 --------------------------
     
     PS C:\>Copy-LongItem -Path C:\temp\win2012R2.iso -Destination C:\temp\2012R2.iso -Verbose -NoBuffering
