@@ -11,9 +11,16 @@ PSAlphaFS is a wrapper for the ALphaFS .NET library providing useful powerShell 
 * New-Item
 * Move-Item
 
+New in version 2.0
+* DisMount-LongShare
+* Get-LongDirectorySize
+* Get-LongDiskDrive
+* Get-LongFreeDriveLetter
+* Get-LongMappedDrive
+* Mount-LongShare
 
 ## Version
-Version 2.0.0.0  see [ChangeLog](https://github.com/v2kiran/PSAlphaFS/blob/master/Changelog.md)
+Version 2.0.0.1  see [ChangeLog](https://github.com/v2kiran/PSAlphaFS/blob/master/Changelog.md)
 
 ## Installation
 
@@ -60,15 +67,6 @@ The cmdlets in this module have been prefixed with the word "long" to distinguis
 * Move-LongItem
 * Remove-LongItem
 * New-LongItem
-
-New in version 2.0
-* DisMount-LongShare
-* Get-LongDirectorySize
-* Get-LongDiskDrive
-* Get-LongFreeDriveLetter
-* Get-LongMappedDrive
-* Mount-LongShare
-
 
 
 Links:

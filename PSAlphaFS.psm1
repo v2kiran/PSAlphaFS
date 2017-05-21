@@ -422,6 +422,10 @@ function Copy-LongItem {
         
         [Switch]
         $Force,
+        
+        [Validateset('File', 'Directory')]
+        [String]
+        $DestinationType,        
 
         # If the source file is a symbolic link, 
         # the destination file is also a symbolic link pointing to the same file that the source symbolic link is pointing to.
@@ -439,13 +443,13 @@ function Copy-LongItem {
 
     Begin {
         $copyOptions = $copyFsObject::FailIfExists
-        if($PSBoundParameters.Containskey('CopySymbolicLink') ) {
+        if ($PSBoundParameters.Containskey('CopySymbolicLink') ) {
             $copyOptions = $copyOptions -bor $copyFsObject::CopySymbolicLink
         }  
-        if($PSBoundParameters.Containskey('NoBuffering') ) {
+        if ($PSBoundParameters.Containskey('NoBuffering') ) {
             $copyOptions = $copyOptions -bor $copyFsObject::NoBuffering
         }  
-        if($PSBoundParameters.Containskey('AllowDecryptedDestination') ) {
+        if ($PSBoundParameters.Containskey('AllowDecryptedDestination') ) {
             $copyOptions = $copyOptions -bor $copyFsObject::AllowDecryptedDestination
         }                       
         $copyOptions = [Alphaleonis.Win32.Filesystem.CopyOptions]$copyOptions
@@ -453,11 +457,11 @@ function Copy-LongItem {
     }
     Process {       
 	
-        if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path,$true)) {
+        if (-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path, $true)) {
             $Path = $PathFSObject::Combine($PWD, $Path.TrimStart('.\'))
         }
 		
-        if(-not ($FileObject::Exists($Path) -or $DirObject::Exists($Path))) {
+        if (-not ($FileObject::Exists($Path) -or $DirObject::Exists($Path))) {
             Write-Warning -Message ("Copy-LongItem:`tPath '{0}' dosent exist." -f $Path)
             return
         }
@@ -468,25 +472,35 @@ function Copy-LongItem {
         $dBasename = $PathFSObject::GetFileName($Destination)
         $dParent = $PathFSObject::GetDirectoryName($Destination)
         
-        $dBasenameObj = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $dBasename
-        $isFile = if($PathFSObject::HasExtension($dBasename) ) {
-            $true
+        if ($DestinationType -eq 'File') {
+            $isFile = $true
         }
-        else {
-            $false
-        } 
+        Elseif ($DestinationType -eq 'Directory') {
+            $isFile = $false
+        }
+        Else {
+            $isFile = if ($PathFSObject::HasExtension($dBasename) ) {
+                $true
+            }
+            else {
+                $false
+            } 
+                     
+        }
+
         
         # Create the directory tree before the copy
-        if($isFile) {
+        if ($isFile) {
             $Destination_isFile = $true
-            if( -not ( $DirObject::Exists($dParent))) {
+            if ( -not ( $DirObject::Exists($dParent))) {
                 $null = $DirObject::CreateDirectory($dParent)
             }
         }#destination is a file
         Else {
             $Destination_isDirectory = $true
-            if( -not ( $DirObject::Exists($Destination))) {
+            if ( -not ( $DirObject::Exists($Destination))) {
                 $null = $DirObject::CreateDirectory($Destination)
+                $Destination = $PathFSObject::Combine($Destination, $basename)
             } 
             Else {
                 $Destination = $PathFSObject::Combine($Destination, $basename)
@@ -495,7 +509,7 @@ function Copy-LongItem {
         
 
                 
-        if($PathObject.EntryInfo.IsDirectory) {
+        if ($PathObject.EntryInfo.IsDirectory) {
             $fsObject = $DirObject
         }
         else {
@@ -505,13 +519,15 @@ function Copy-LongItem {
         # Perform the copy     
         try {
             Write-Verbose -Message ("Copy-LongItem:`tCopying '{0}' to '{1}'" -f $Path, $Destination)
-            $fsObject::Copy($Path, $Destination,$copyOptions)
+            $fsObject::Copy($Path, $Destination, $copyOptions)
         }
         catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException] {
-            if($Force) {
+            if ($Force) {
                 # need to delete destination because the copy method dosent contain an overload that includes
                 # both the overwrite and copyoptions parameters
-                $DirObject::Delete($Destination, $true, $true, $PathFSFormatObject::FullPath) 
+                $fsObject::Delete($Destination, $true, $PathFSFormatObject::FullPath) 
+
+                Start-Sleep -Milliseconds 300
 
                 Write-Verbose -Message ("Copy-LongItem:`t Overwriting existing item...Copying '{0}' to '{1}'" -f $Path, $Destination)
                 $fsObject::Copy($Path, $Destination, $copyOptions)               
@@ -524,9 +540,6 @@ function Copy-LongItem {
             throw $_
         }
     
-        
-        
-
     }#Process
     End {
         If ($privilegeEnabler) {
@@ -1126,6 +1139,7 @@ function Get-LongDirectorySize {
     Param
     (
         # Specify the Path to a Folder      
+        [Alias('FullName')]
         [Parameter(
             ValueFromPipelineByPropertyName,
             ValueFromPipeline,
@@ -1133,9 +1147,20 @@ function Get-LongDirectorySize {
         [String]
         $Path = $pwd,
 
+        [Parameter(
+            ValueFromPipelineByPropertyName,
+            Position = 1)]
+        [String]
+        [ValidateSet('KB', 'MB', 'GB', 'TB', 'PB', 'Bytes')]
+        $Unit = 'Bytes',        
+
         # Enumerate Subdirectories
         [Switch] 
         $Recurse,
+
+        # Include folder sizes for subfolders
+        [Switch] 
+        $IncludeSubfolder,        
 
         # Enumerate Subdirectories
         [Switch] 
@@ -1147,51 +1172,92 @@ function Get-LongDirectorySize {
         $privilegeEnabler = New-Object -TypeName Alphaleonis.Win32.Security.PrivilegeEnabler -ArgumentList ([Alphaleonis.Win32.Security.Privilege]::Backup, $null)
         $dirEnumOptions = $dirEnumOptionsFSObject::SkipReparsePoints
 
-        if($PSBoundParameters.Containskey('Recurse') ) {
+        if ($PSBoundParameters.Containskey('Recurse') ) {
             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::Recursive
         } 
-        if($PSBoundParameters.Containskey('ContinueonError') ) {
+        if ($PSBoundParameters.Containskey('ContinueonError') ) {
             $dirEnumOptions = $dirEnumOptions -bor $dirEnumOptionsFSObject::ContinueOnException
         }         
         $dirEnumOptions = [Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions]$dirEnumOptions 
     }
     Process {
 
-        if(-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path)) {
+        if (-not [Alphaleonis.Win32.Filesystem.Path]::IsPathRooted($Path)) {
             $Path = $PathFSObject::Combine($PWD, $Path.TrimStart('.\'))
         }
 		
-        if(-not $DirObject::Exists($Path)) {
-            Write-Warning -Message ("Get-LongDirectorySize:`tPath '{0}' either is not a directory or it dosent exist." -f $Path)
+        if (-not $DirObject::Exists($Path)) {
             return
         }
-		
-        $PathObject = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
-		
-        if(-not $PathObject.EntryInfo.IsDirectory) {
-            Write-Warning -Message ("Get-LongDirectorySize:`tPlease prove a directory name as input to the path {0} parameter" -f $Path)
-            return
-			
-        } 
-		
 
-        $ResultHash = $DirObject::GetProperties( $Path, $dirEnumOptions, $PathFSFormatObject::FullPath)
-        $size = $ResultHash.Size
-            
-        if($size) {
-            $postfixes = @( 'Bytes', 'KB', 'MB', 'GB', 'TB', 'PB' )
-            for ($i = 0; $size -ge 1024 -and $i -lt $postfixes.Length - 1; $i++) {
-                $size = $size / 1024
+        if ($IncludeSubfolder) {
+            $foldernames = New-Object System.Collections.ArrayList
+            $foldernames.Add($path) | Out-Null
+            $DirObject::EnumerateFileSystemEntries($Path, '*', $dirEnumOptionsFSObject::Folders) | ForEach-Object {$null = $foldernames.Add($_)}
+
+            $foldernames | 
+                ForEach-Object -Process {
+                $pItem = $_
+                $ResultHash = $DirObject::GetProperties( $pItem, $dirEnumOptions, $PathFSFormatObject::FullPath)
+                $size = $ResultHash.Size
+
+
+                if ($Unit -eq 'bytes') {
+                    $Size_header = 'Size'
+                }
+                Else {
+                    $size = [System.Math]::Round($size / "1$Unit")
+                    $Size_header = "Size($Unit)"
+                }
+
+                Write-Verbose -Message ("The size of the folder '{0}' is '{1} {2}'" -f $pItem, $size, $Unit)
+                [PSCustomObject]@{
+                    pstypename = 'PSAlphaFS.DirectorySize'
+                    Path = $pItem
+                    Size = $size
+                    Directory = $ResultHash.Directory
+                    FIle = $ResultHash.File
+                    Hidden = $ResultHash.Hidden
+                    Count = $ResultHash.Total                    
+                    DirectoryStats = $ResultHash
+                }
+
             }
-            $rounded_size = [Math]::Round($size,2)
-            $null = $ResultHash.Add("Sizein$($postfixes[$i])", $rounded_size)
-            Write-Verbose -Message ("The size of the folder '{0}' is '{1} {2}'" -f $Path, $rounded_size, $postfixes[$i])
         }
-        Write-Output -InputObject $ResultHash
+        Else {
+            $PathObject = New-Object -TypeName Alphaleonis.Win32.Filesystem.FileInfo -ArgumentList $Path
+		
+            if (-not $PathObject.EntryInfo.IsDirectory) {
+                return			
+            } 
+		
+
+            $ResultHash = $DirObject::GetProperties( $Path, $dirEnumOptions, $PathFSFormatObject::FullPath)
+            $size = $ResultHash.Size
 
 
-        
-        
+            if ($Unit -eq 'bytes') {
+                $Size_header = 'Size'
+            }
+            Else {
+                $size = [System.Math]::Round($size / "1$Unit")
+                $Size_header = "Size($Unit)"
+            }
+
+            Write-Verbose -Message ("The size of the folder '{0}' is '{1} {2}'" -f $Path, $size, $Unit)
+            [PSCustomObject]@{
+                pstypename = 'PSAlphaFS.DirectorySize'
+                Path = $Path
+                Size = $size
+                Directory = $ResultHash.Directory
+                FIle = $ResultHash.File
+                Hidden = $ResultHash.Hidden
+                Count = $ResultHash.Total
+                DirectoryStats = $ResultHash
+            }
+
+        }
+        #if not includesubfolders	      
     }#Process
     End {
         If ($privilegeEnabler) {
