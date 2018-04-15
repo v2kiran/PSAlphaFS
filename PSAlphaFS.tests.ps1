@@ -37,7 +37,7 @@ function CreateLongDirStructure
 Describe "Get-LongChildItem" {
     Context "Parameters" {
         BeforeAll {
-			$lastfolder = ldir C:\temp\pester\psalphafs -Recurse -Directory | where name -eq 264 | select -Last 1 -ExpandProperty FullName		
+			$lastfolder = ldir C:\temp\pester\psalphafs -Recurse -Directory | where name -eq '264' | select -Last 1 -ExpandProperty FullName		
             $2ndlastfolder = ldir C:\temp\pester\psalphafs -Recurse -Directory | where name -eq 263 | select -ExpandProperty FullName
             $lastfile = 'file-264.txt'
             $2ndlastfile1 = "file-263-1.txt"
