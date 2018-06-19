@@ -800,7 +800,12 @@ function Move-LongItem
 
     Begin
     {
+        #If the file is to be moved to a different volume, 
+        #function simulates the move by using the CopyFile and 
+        #DeleteFile functions.
         $mOptions = $MoveOptions::CopyAllowed
+
+        #function does not return until file has been moved on the disk.
         $mOptions = $mOptions -bor $MoveOptions::WriteThrough
     }
     Process
