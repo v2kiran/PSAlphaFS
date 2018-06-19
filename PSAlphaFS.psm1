@@ -854,7 +854,7 @@ function Move-LongItem {
                 $Object = $FileObject
             }
             Elseif($Basename_isDirectory) {
-                $Object = $DirectoryObject
+                $Object = $DirObject
             }
                 
             if($Force) {
