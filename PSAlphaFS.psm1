@@ -769,7 +769,7 @@ function Move-LongItem {
                     $true
                 }
                 Else {
-                    Write-Warning -Message ("Rename-LongItem:`tPath '{0}' does not exist`n`n" -f $_) 
+                    Write-Warning -Message ("Move-LongItem:`tPath '{0}' does not exist`n`n" -f $_) 
                 }
             })]           
         [Alias('FullName')]
