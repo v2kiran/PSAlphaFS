@@ -759,16 +759,19 @@ function New-LongItem {
 
 
 # .ExternalHelp PSAlphafs.psm1-help.xml
-function Move-LongItem {
+function Move-LongItem
+{
     [CmdletBinding()]
     Param
     (
         # The Path to the File or Folder    
-        [ValidateScript({ 
-                if( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) -or  [Alphaleonis.Win32.Filesystem.File]::Exists($_)  ) {
+        [ValidateScript( { 
+                if ( [Alphaleonis.Win32.Filesystem.Directory]::Exists($_) -or [Alphaleonis.Win32.Filesystem.File]::Exists($_)  )
+                {
                     $true
                 }
-                Else {
+                Else
+                {
                     Write-Warning -Message ("Move-LongItem:`tPath '{0}' does not exist`n`n" -f $_) 
                 }
             })]           
@@ -787,60 +790,77 @@ function Move-LongItem {
         $Destination,
         
         [Switch]
-        $Force        
+        $Force,
+
+        [Validateset('File', 'Directory')]
+        [String]
+        $DestinationType
         
-          
     )
 
-    Begin {
+    Begin
+    {
         $ReplaceExisting = [Alphaleonis.Win32.Filesystem.MoveOptions]::ReplaceExisting
     }
-    Process {       
+    Process
+    {       
         $Parent = $PathFSObject::GetDirectoryName($Path)
         $basename = $PathFSObject::GetFileName($Path)
         $dParent = $PathFSObject::GetDirectoryName($Destination)
         $dBasename = $PathFSObject::GetFileName($Destination)
 
-        $isFile = if($PathFSObject::HasExtension($basename) ) {
+        $isFile = if ($PathFSObject::HasExtension($basename) )
+        {
             $true
         }
-        else {
+        else
+        {
             $false
         } 
-        $isFile_destination = if($PathFSObject::HasExtension($dBasename) ) {
+        $isFile_destination = if ($PathFSObject::HasExtension($dBasename) )
+        {
             $true
         }
-        else {
+        else
+        {
             $false
         } 
         
-        if($isFile) {
+        if ($isFile)
+        {
             #Basename is a file so destination has to be a file
             $Basename_isFile = $true
             
-            if ($isFile_destination) {
+            if ($isFile_destination)
+            {
                 $Destination_isFile = $true
                 $NewPath = $Destination 
             }            
-            Else {
+            Else
+            {
                 $Destination_isDirectory = $true
                 $NewPath = $PathFSObject::Combine($Destination, $basename)
             }            
         }#basename is file
-        Else {
+        Else
+        {
             #basename is a folder so check the destination basename
             $Basename_isDirectory = $true
-            if ($isFile_destination) {
+            if ($isFile_destination)
+            {
                 Write-Warning -Message ("Move-LongItem:`tThe source is a directory so please specify a directory as the destination")
                 break
             }            
-            Else {
+            Else
+            {
                 $Destination_isDirectory = $true
 
-                if($DirObject::Exists($Destination )) {
+                if ($DirObject::Exists($Destination ))
+                {
                     $NewPath = $PathFSObject::Combine($Destination, $basename)
                 }
-                Else {
+                Else
+                {
                     $NewPath = $Destination
                 }
             }# destination is a directory             
@@ -849,39 +869,49 @@ function Move-LongItem {
         
 
 
-        if($Path -ne $NewPath) {
-            if ($Basename_isFile) {
+        if ($Path -ne $NewPath)
+        {
+            if ($Basename_isFile)
+            {
                 $Object = $FileObject
             }
-            Elseif($Basename_isDirectory) {
+            Elseif ($Basename_isDirectory)
+            {
                 $Object = $DirObject
             }
                 
-            if($Force) {
+            if ($Force)
+            {
                 Write-Verbose -Message ("Move-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
-                $Object::Move($Path, $NewPath,$ReplaceExisting)              
+                $Object::Move($Path, $NewPath, $ReplaceExisting)              
             }
-            Else {
-                try {
+            Else
+            {
+                try
+                {
                     Write-Verbose -Message ("Move-LongItem:`n {0} `n`t`t{1}`n" -f $Path, $NewPath)
-                    $Object::move($Path,$NewPath)
+                    $Object::move($Path, $NewPath)
                 }
-                catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException] {
+                catch [Alphaleonis.Win32.Filesystem.AlreadyExistsException]
+                {
                     Write-Warning -Message ("Move-LongItem:`tAn item named '{0}' already exists at the destination.`nUse '-Force' to overwrite" -f $NewPath)
                 }
-                Catch {
+                Catch
+                {
                     throw $_
                 }
             }#no force
         }
-        Else {
+        Else
+        {
             Write-Warning -Message ("Move-LongItem:`tAn item cannot be moved to a destination that is same as the source")
         }
                 
         
     
     }#Process
-    End {
+    End
+    {
     
     }
 }#end function 
