@@ -19,6 +19,10 @@ Function GetDotNetVer {
         394271 = '4.6.1'
         394802 = '4.6.2'
         394806 = '4.6.2'
+        460798 = '4.7'  
+        460805 = '4.7'  
+        461308 = '4.7.1'
+        461310 = '4.7.1'       
     }
 
 
@@ -61,7 +65,9 @@ else {
         '4.5.1'  {$libpath = Join-Path $libpath_parent -ChildPath 'net451\AlphaFS.dll';break}
         '4.5.2'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
         '4.6.1'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
-        '4.6.2'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll';break}
+        '4.6.2'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll'; break}
+        '4.7'    {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll'; break}
+        '4.7.1'  {$libpath = Join-Path $libpath_parent -ChildPath 'net452\AlphaFS.dll'; break}        
         default  {$libpath = Join-Path $libpath_parent -ChildPath 'net40\AlphaFS.dll'}
     }
     
