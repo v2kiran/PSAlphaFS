@@ -801,6 +801,8 @@ function Move-LongItem
     Begin
     {
         $ReplaceExisting = [Alphaleonis.Win32.Filesystem.MoveOptions]::ReplaceExisting
+        $mOptions = $MoveOptions::CopyAllowed
+        $mOptions = $mOptions -bor $MoveOptions::WriteThrough
     }
     Process
     {       
